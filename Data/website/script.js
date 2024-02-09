@@ -1,4 +1,4 @@
-let creatures = {};
+let creatureContainers = {};
 let creatureCount = 0;
 
 function getLabel(key) {
@@ -24,33 +24,47 @@ function addCreature() {
         return;
     }
 
-    creatures[creatureName] = {};
+    creatureName = creatureName.trim(); // Normalize the creature name
+    if (creatureContainers.hasOwnProperty(creatureName.toLowerCase())) {
+        alert("Creature name already exists. Please choose a unique name.");
+        creatureCount--;
+        return;
+    }
 
-    const requiredInputs = ["succ", "fail", "cooldown"];
-    const optionalInputs = ["lvl", "cost", "xp", "color"];
-    // Define default values for optional inputs
-    const defaultValues = {
-        lvl: 1,
-        cost: 0,
-        xp: 0,
-        color: "",
+    creatureContainers[creatureName] = {
+        number: creatureCount
     };
 
     const creatureDiv = document.createElement("div");
     creatureDiv.className = "creature-container";
+    creatureDiv.id = `creature-${creatureCount}`;
 
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.value = creatureName;
     nameInput.addEventListener("input", () => {
         const newName = nameInput.value.trim();
-        if (newName && newName !== creatureName) {
-            creatures[newName] = creatures[creatureName];
-            delete creatures[creatureName];
-            creatureName = newName;
+        if (newName.toLowerCase() !== creatureName.toLowerCase()) {
+            if (creatureContainers.hasOwnProperty(newName.toLowerCase())) {
+                alert("Creature name already exists. Please choose a unique name.");
+                nameInput.value = creatureName; // Revert to the original name
+                return;
+            }
+            delete creatureContainers[creatureName]; // Remove the old name from the container
+            creatureName = newName; // Update the creature name
+            creatureContainers[creatureName] = { number: creatureCount }; // Update container with new name
         }
     });
     creatureDiv.appendChild(nameInput);
+
+    const requiredInputs = ["succ", "fail", "cooldown"];
+    const optionalInputs = ["lvl", "cost", "xp", "color"];
+    const defaultValues = {
+        lvl: 1,
+        cost: 0,
+        xp: 0,
+        color: "",
+    };
 
     requiredInputs.forEach((key) => {
         const inputLabel = document.createElement("label");
@@ -72,10 +86,9 @@ function addCreature() {
                 value = validateInteger(value);
             }
             if (key === "xp" && value === "") {
-                // Reset the value of xp when it's cleared
                 inputBox.value = "";
             } else {
-                creatures[creatureName][key] = value;
+                creatureContainers[creatureName][key] = value;
             }
         });
         creatureDiv.appendChild(inputBox);
@@ -89,10 +102,9 @@ function addCreature() {
         const inputBox = document.createElement("input");
         inputBox.type = "text";
         inputBox.placeholder = getLabel(key);
-        // Set default value if available
         if (defaultValues[key] !== undefined) {
             inputBox.value = defaultValues[key];
-            creatures[creatureName][key] = defaultValues[key]; // Store default value in creatures object
+            creatureContainers[creatureName][key] = defaultValues[key];
         }
         inputBox.addEventListener("input", () => {
             let value = inputBox.value.trim();
@@ -103,7 +115,7 @@ function addCreature() {
             } else {
                 value = validateInteger(value);
             }
-            creatures[creatureName][key] = value;
+            creatureContainers[creatureName][key] = value;
         });
         creatureDiv.appendChild(inputBox);
     });
@@ -111,7 +123,7 @@ function addCreature() {
     const removeButton = document.createElement("button");
     removeButton.textContent = "Remove";
     removeButton.addEventListener("click", () =>
-        removeCreature(creatureDiv.parentNode)
+        removeCreature(creatureName)
     );
     creatureDiv.appendChild(removeButton);
 
@@ -122,32 +134,54 @@ function addCreature() {
     document.getElementById("creatures-container").appendChild(creatureDiv);
 }
 
-function removeCreature(creatureContainer) {
-    if (confirm(`Are you sure you want to remove this creature?`)) {
-        const creatureName =
-            creatureContainer.querySelector('input[type="text"]').value;
-        delete creatures[creatureName];
-        creatureContainer.remove();
-        creatureCount--;
-        const creatureContainers = document.querySelectorAll(
-            ".creature-container"
-        );
-        creatureContainers.forEach((container, index) => {
-            container.querySelector("span").textContent = `Creature #${
-                index + 1
-            }: `;
+function removeCreature(creatureName) {
+    if (!creatureContainers.hasOwnProperty(creatureName)) {
+        console.error(`Creature container not found for creature "${creatureName}"`);
+        return;
+    }
+
+    if (confirm(`Are you sure you want to remove creature "${creatureName}"?`)) {
+        // Remove creature from backend
+        delete creatureContainers[creatureName];
+
+        // Remove the HTML element of the removed creature
+        const creatureDiv = document.querySelector(`#creatures-container > div`);
+        if (creatureDiv) {
+            creatureDiv.remove();
+        }
+
+        // Update labels for all remaining creatures
+        const allCreatureContainers = document.querySelectorAll(".creature-container");
+        allCreatureContainers.forEach((container, index) => {
+            const currentCreatureNumber = index + 1;
+            const creatureLabel = container.querySelector("span");
+            if (creatureLabel) {
+                creatureLabel.textContent = `Creature #${currentCreatureNumber}: `;
+            }
+
+            // Update the ID of the creature div
+            container.id = `creature-${currentCreatureNumber}`;
         });
+
+        // Update the count of creatures
+        creatureCount--;
     }
 }
 
 function generateJSON() {
     try {
-        const defaultLevel = 1;
-        const defaultCost = 0;
-        const defaultXP = 0;
+        const defaultValues = getDefaultValues();
+        const creatureNames = new Set();
 
-        for (const creatureName in creatures) {
-            const creature = creatures[creatureName];
+        for (const creatureName in creatureContainers) {
+            const normalizedCreatureName = creatureName.toLowerCase();
+            if (creatureNames.has(normalizedCreatureName)) {
+                alert(`Duplicate creature name found: ${creatureName}. Please use unique names.`);
+                return;
+            }
+            creatureNames.add(normalizedCreatureName);
+
+            const creature = creatureContainers[creatureName];
             const requiredInputs = ["succ", "fail", "cooldown"];
             for (const key of requiredInputs) {
                 const value = creature[key];
@@ -169,81 +203,33 @@ function generateJSON() {
                 }
             }
 
-            const characterLevel = creature["lvl"];
-            if (characterLevel !== undefined) {
-                if (isNaN(characterLevel) || characterLevel < 0) {
-                    alert(
-                        `Please provide a non-negative number for the field "Required Character Level" for creature "${creatureName}".`
-                    );
-                    return;
-                } else {
-                    creatures[creatureName]["lvl"] = Math.floor(characterLevel);
+            const optionalInputs = ["lvl", "cost", "xp", "color"];
+            optionalInputs.forEach((key) => {
+                if (creature[key] === undefined) {
+                    creature[key] = defaultValues[key];
                 }
-            } else {
-                // Set default value for character level
-                creatures[creatureName]["lvl"] = defaultLevel;
+            });
+
+            if (creature["lvl"] === defaultValues.lvl) {
+                delete creature["lvl"];
+            }
+            if (creature["xp"] === defaultValues.xp) {
+                delete creature["xp"];
+            }
+            if (creature["cost"] === defaultValues.cost) {
+                delete creature["cost"];
+            }
+            if (creature["color"] === "") {
+                delete creature["color"];
             }
 
-            const experienceGain = creature["xp"];
-            if (experienceGain !== undefined && experienceGain !== "") {
-                if (experienceGain < 0) {
-                    alert(
-                        `Please provide a non-negative number for the field "Experience Gain" for creature "${creatureName}".`
-                    );
-                    return;
-                } else {
-                    const validatedXP = validatePositiveInteger(experienceGain);
-                    if (validatedXP === null) {
-                        alert(
-                            `Please provide a non-negative number for the field "Experience Gain" for creature "${creatureName}".`
-                        );
-                        return;
-                    }
-                    creatures[creatureName]["xp"] = validatedXP;
-                }
-            } else {
-                // Set default value for experience gain
-                creatures[creatureName]["xp"] = defaultXP;
-            }
-
-            let tamingCost = creature["cost"];
-            if (tamingCost !== undefined && tamingCost !== "") {
-                tamingCost = parseFloat(tamingCost);
-                if (isNaN(tamingCost)) {
-                    alert(
-                        `Please provide a number for the field "Taming Cost (in GP)" for creature "${creatureName}".`
-                    );
-                    return;
-                }
-                creatures[creatureName]["cost"] = tamingCost;
-            } else {
-                // Set default value for taming cost
-                creatures[creatureName]["cost"] = defaultCost;
-            }
-
-            // Remove optional fields with default values
-            if (creatures[creatureName]["lvl"] === defaultLevel) {
-                delete creatures[creatureName]["lvl"];
-            }
-            if (creatures[creatureName]["xp"] === defaultXP) {
-                delete creatures[creatureName]["xp"];
-            }
-            if (creatures[creatureName]["cost"] === defaultCost) {
-                delete creatures[creatureName]["cost"];
-            }
-            if (creatures[creatureName]["color"] === "") {
-                delete creatures[creatureName]["color"]
-            }
-        }
-
-        for (const creatureName in creatures) {
-            const creatureColor = creatures[creatureName]["color"];
+            const creatureColor = creature["color"];
             if (creatureColor) {
-                creatures[creatureName]["color"] = "#" + creatureColor;
+                creature["color"] = "#" + creatureColor;
             }
         }
 
-        const jsonString = JSON.stringify(creatures);
+        const jsonString = JSON.stringify(creatureContainers);
 
         navigator.clipboard
             .writeText(jsonString)
@@ -254,6 +240,7 @@ function generateJSON() {
         alert("Error generating JSON. Please check your input data.");
     }
 }
+
 
 function validatePositiveInteger(value) {
     const intValue = parseInt(value, 10);
@@ -270,7 +257,6 @@ function isRequired(key) {
     return requiredInputs.includes(key);
 }
 
-// Define validateInteger function globally
 function validateInteger(value) {
     const intValue = parseInt(value, 10);
     return !isNaN(intValue) ? intValue : null;
@@ -280,37 +266,19 @@ function toggleDarkMode() {
     const html = document.documentElement;
     const isDarkMode = html.classList.toggle("dark-mode");
 
-    // Update scrollbar colors based on dark mode
-    updateScrollbarColors(isDarkMode);
-
-    // Update creature container styles based on dark mode
-    const creatureContainers = document.querySelectorAll(".creature-container");
-    creatureContainers.forEach((container) => {
+    const creatureContainersArray = Object.values(creatureContainers);
+    creatureContainersArray.forEach((container) => {
         container.classList.toggle("dark-mode", isDarkMode);
     });
 
-    // Update Discord widget theme
-    const discordWidget = document.querySelector(
-        "iframe[src^='https://discord.com/widget']"
-    );
-    if (discordWidget) {
-        const newSrc = discordWidget.src.replace(
-            /theme=(\w+)/,
-            `theme=${isDarkMode ? "dark" : "light"}`
-        );
-        discordWidget.src = newSrc;
-    }
-
-    // Save the dark mode state to local storage
     localStorage.setItem("darkMode", isDarkMode ? "enabled" : "disabled");
 }
 
-// Check if system prefers dark mode initially
 const prefersDarkMode =
     window.matchMedia &&
     window.matchMedia("(prefers-color-scheme: dark)").matches;
 if (prefersDarkMode) {
-    toggleDarkMode(); // Apply dark mode if system prefers it
+    toggleDarkMode();
 }
 
 function updateScrollbarColors(isDarkMode) {
@@ -323,4 +291,164 @@ function updateScrollbarColors(isDarkMode) {
         "--scrollbar-bg-color",
         scrollbarBgColor
     );
+}
+
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const json = JSON.parse(e.target.result);
+            for (const creatureName in json) {
+                if (json.hasOwnProperty(creatureName)) {
+                    addCreatureFromJSON(creatureName, json[creatureName]);
+                }
+            }
+            alert("Creatures added from the uploaded file.");
+
+            // Clear the input field after successfully processing the file
+            event.target.value = '';
+        } catch (error) {
+            alert("Error parsing JSON file.");
+            console.error("Error parsing JSON:", error);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+
+function addCreatureFromJSON(creatureName, creatureData) {
+    creatureName = creatureName.trim(); // Normalize the creature name
+    if (creatureContainers.hasOwnProperty(creatureName.toLowerCase())) {
+        alert("Creature name already exists. Please choose a unique name.");
+        return;
+    }
+
+    creatureCount++;
+    creatureContainers[creatureName] = {
+        number: creatureCount
+    };
+
+    const creatureDiv = document.createElement("div");
+    creatureDiv.className = "creature-container";
+    creatureDiv.id = `creature-${creatureCount}`;
+
+    const creatureLabel = document.createElement("span");
+    creatureLabel.textContent = `Creature #${creatureCount}: `;
+    creatureDiv.appendChild(creatureLabel);
+
+    creatureData.number = creatureCount;
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = creatureName;
+    nameInput.addEventListener("input", () => {
+        const newName = nameInput.value.trim();
+        if (newName.toLowerCase() !== creatureName.toLowerCase()) {
+            if (creatureContainers.hasOwnProperty(newName.toLowerCase())) {
+                alert("Creature name already exists. Please choose a unique name.");
+                nameInput.value = creatureName; // Revert to the original name
+                return;
+            }
+            delete creatureContainers[creatureName]; // Remove the old name from the container
+            creatureName = newName; // Update the creature name
+            creatureContainers[creatureName] = { number: creatureCount }; // Update container with new name
+        }
+    });
+    creatureDiv.appendChild(nameInput);
+
+    const requiredInputs = ["succ", "fail", "cooldown"];
+    const optionalInputs = ["lvl", "cost", "xp", "color"];
+    const defaultValues = {
+        lvl: 1,
+        cost: 0,
+        xp: 0,
+        color: "",
+    };
+
+    const succInputLabel = document.createElement("label");
+    succInputLabel.textContent = getLabel("succ");
+    creatureDiv.appendChild(succInputLabel);
+
+    const succInputBox = document.createElement("input");
+    succInputBox.type = "text";
+    succInputBox.value = creatureData["succ"] || "";
+    succInputBox.placeholder = getLabel("succ");
+    succInputBox.addEventListener("input", () => {
+        let value = succInputBox.value.trim();
+        value = validatePositiveInteger(value);
+        creatureData["succ"] = value;
+        creatureContainers[creatureName]["succ"] = value;
+    });
+    creatureDiv.appendChild(succInputBox);
+
+    requiredInputs.forEach((key) => {
+        if (key !== "succ") {
+            const inputLabel = document.createElement("label");
+            inputLabel.textContent = getLabel(key);
+            creatureDiv.appendChild(inputLabel);
+
+            const inputBox = document.createElement("input");
+            inputBox.type = "text";
+            inputBox.value = creatureData[key] || "";
+            inputBox.placeholder = getLabel(key);
+            inputBox.addEventListener("input", () => {
+                let value = inputBox.value.trim();
+                if (key === "color") {
+                    value = validateColor(value);
+                } else if (key === "cost") {
+                    value = validateFloat(value);
+                } else {
+                    value = validateInteger(value);
+                }
+                creatureData[key] = value;
+                creatureContainers[creatureName][key] = value;
+            });
+            creatureDiv.appendChild(inputBox);
+        }
+    });
+
+    optionalInputs.forEach((key) => {
+        const inputLabel = document.createElement("label");
+        inputLabel.textContent = getLabel(key);
+        creatureDiv.appendChild(inputLabel);
+
+        const inputBox = document.createElement("input");
+        inputBox.type = "text";
+        inputBox.value = creatureData[key] !== undefined ? creatureData[key] : defaultValues[key];
+        inputBox.placeholder = getLabel(key);
+        inputBox.addEventListener("input", () => {
+            let value = inputBox.value.trim();
+            if (key === "color") {
+                value = validateColor(value);
+            } else if (key === "cost") {
+                value = validateFloat(value);
+            } else {
+                value = validateInteger(value);
+            }
+            creatureData[key] = value;
+            creatureContainers[creatureName][key] = value;
+        });
+        creatureDiv.appendChild(inputBox);
+    });
+
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () =>
+        removeCreature(creatureName)
+    );
+    creatureDiv.appendChild(removeButton);
+
+    document.getElementById("creatures-container").appendChild(creatureDiv);
+}
+
+function getDefaultValues() {
+    return {
+        lvl: 1,
+        cost: 0,
+        xp: 0,
+        color: "",
+    };
 }

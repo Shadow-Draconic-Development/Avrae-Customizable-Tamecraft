@@ -1,49 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Creature Import Generation Form</title>
-        <link rel="stylesheet" href="Data/website/styles.css" />
-    </head>
-    <body>
-        <div class="container">
-            <header>
-                <div
-                    class="header-content"
-                    style="
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: baseline;
-                    "
-                >
-                    <h1 style="margin: 0">Creature Import Generation Form</h1>
-                    <img
-                        src="Data/main.png"
-                        alt="Logo"
-                        width="10%"
-                        style="vertical-align: bottom; min-width: 70px"
-                    />
-                </div>
-                <hr />
-            </header>
-            <div id="creatures-container"></div>
-            <div class="button-container">
-                <button onclick="addCreature()">Add Creature</button>
-                <button onclick="generateJSON()">Generate JSON</button>
-                <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-                <input
-                    type="file"
-                    accept=".json,.txt"
-                    onchange="handleFileUpload(event)"
-                    style="display: none"
-                    id="fileInput"
-                />
-                <label for="fileInput" class="file-upload-button"
-                    >Upload File</label
-                >
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creature Import Generation Form</title>
+    <link rel="stylesheet" href="Data/website/styles.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="header-content" style="display: flex; justify-content: space-between; align-items: baseline;">
+            <h1 style="margin: 0">Creature Import Generation Form</h1>
+            <img src="Data/main.png" alt="Logo" width="10%" style="vertical-align: bottom; min-width: 70px">
         </div>
-        <script src="Data/website/script.js"></script>
-    </body>
+        <hr>
+    </header>
+    <div id="creatures-container"></div>
+    <div class="button-container">
+        <button onclick="addCreature()">Add Creature</button>
+        <button onclick="generateJSON()">Generate JSON</button>
+        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        <input type="file" accept=".json,.txt" onchange="handleFileUpload(event)" style="display: none" id="fileInput">
+        <label for="fileInput" class="file-upload-button">Upload File</label>
+    </div>
+</div>
+<script src="Data/website/script.js"></script>
+</body>
 </html>
