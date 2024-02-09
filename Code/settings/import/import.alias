@@ -312,9 +312,9 @@ def main(input_dict: dict) -> tuple(str, str):
     else:
 
         color_list = []
-        for creature_name in svar_dict["creatures"].keys():
-            if "color" in svar_dict["creatures"][creature_name].keys():
-                color_list.append(svar_dict["creatures"][creature_name]["color"])
+        for creature_name, creature_value in svar_dict["creatures"].items():
+            if "color" in creature_value.keys():
+                color_list.append(creature_value["color"])
 
             else:
                 pass
