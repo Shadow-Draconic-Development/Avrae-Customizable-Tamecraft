@@ -23,16 +23,6 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def edit_creature_errors(creature_errors: dict, creature_name: str, error: str) -> dict:
-
-    if creature_name in creature_errors.keys():
-        creature_errors.append(error)
-
-    else:
-        creature_errors[creature_name] = [error]
-
-    return creature_errors
-
 def edit_creature(svar_dict: dict, creature_name: str, creature_value: dict, creature_errors: dict, default_settings: dict) -> tuple(dict, dict):
     
     # Successes
@@ -209,132 +199,107 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_value: dict, cre
     return svar_dict, creature_errors
 
 
-def main(input_dict: dict) -> tuple(str, str):
-    date = "2/9/24"
-    prefix = ctx.prefix
-    default_settings = {
-        "cost": 0,
-        "xp": 0,
-        "color": ""
-    }
+def main(input_list: list[str]) -> tuple(str, str):
 
-    if (svar_test := get_svar("tame_settings")):
-        svar_dict = load_json(svar_test)
+    if len(input_list) > 0:
+
+        date = "2/9/24"
+        prefix = ctx.prefix
+
+        default_settings = {
+            "cost": 0,
+            "xp": 0,
+            "color":
+        }
 
     else:
-        svar_dict = {"creatures": {}}
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected at least creature name, successes, failures, cooldown, and DC' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
 
-    creatures_created = []
-    creatures_edited = []
-    creature_errors = {}
 
-    for creature_name, creature_value in input_dict.values():
+    if input_list[0][0] != "-":
 
-        if not (search_result := search_list(creature_name, svar_dict["creatures"].keys())):
-            svar_dict, creature_errors = edit_creature(svar_dict, creature_name, creature_value, creature_errors, default_settings)
-            
-            if not creature_name in creature_errors.keys() 
-                creatures_created.append(creature_name)
+        creature_name = input_list.pop(0)
 
-            else:
+        args = argparse(" ".join(input_list))
+
+        changes_dict = {
+            "succ": args.last("succ", default=False),
+            "fail": args.last("fail", default=False), 
+            "cooldown": args.last("cooldown", default=False),
+            "DC": args.last("dc", default=False)
+            }
+
+        label_map = {
+            "succ": "Successes Required",
+            "fail": "Maximum Failures", 
+            "cooldown": "Cooldown (in seconds)",
+            "dc": "DC"
+            }
+
+
+        for req, req_arg in changes_dict.items():
+
+            if req_arg:
                 pass
 
+            else:
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'You are missing a required argument: {label_map[req]}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
+
+        if not (search_result := search_list(creature_name, svar_dict["creatures"].keys())):
+            pass
+
         else:
-            found = False
 
             for match in search_result:
-
                 if match.lower() != creature_name.lower():
                     pass
 
                 else:
-                    found = True
-                    svar_dict, creature_errors = edit_creature(svar_dict, creature_name, creature_value, creature_errors, default_settings)
-                    
-                    if not creature_name in creature_errors.keys() 
-                        creatures_edited.append(creature_name)
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'That creature already exists' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
 
-                    else:
-                        pass
 
-                if not found:
-                    svar_dict, creature_errors = edit_creature(svar_dict, creature_name, creature_value, creature_errors, default_settings)
-                    
-                    if not creature_name in creature_errors.keys() 
-                        creatures_created.append(creature_name)
+        changes_dict.update({
+            "lvl": args.last("lvl", default=False),
+            "cost": args.last("cost", default=False),
+            "xp": args.last("xp", default=False),
+            "color": args.last("color", default=False)
+        })
 
-                    else:
-                        pass
+        creature_errors = {}
+
+        svar_dict, creature_errors = edit_creature(svar_dict, creature_name, {key:value for key, value in changes_dict.items() if value != False}, default_settings)
+
+        if len(creature_errors) == 0:
+
+            color_list = []
+
+            for creature_name, creature_value in svar_dict["creatures"].items():
+                if "color" in creature_value.keys():
+                    color_list.append(creature_value["color"])
 
                 else:
                     pass
 
-    output_list = ["**Creatures Added:**"]
-
-    if len(creatures_created) > 0:
-        for creature_name in creatures_created:
-            output_list.append(f"- {creature_name}")
-
-    else:
-        output_list.append("None")
-
-    output_list.append("\n**Creatures Edited:**")
-
-    if len(creatures_edited) > 0:
-        for creature name in creatures_edited:
-            output_list.append(f"- {creature_name}")
-
-    else:
-        output_list.append("None")
-
-    if len(creature_errors) == 0:
-        pass
-
-    else:
-        output_list.append("\n**Errors**")
-
-        for creature_name, error_list in creature_errors.items():
-            output_list.append(f"- {creature_name}")
-
-            for error in error_list:
-                output_list.append(f"    - {error}")
-
-    if len(creatures_created) > 0 and len(creatures_edited) > 0: 
-        svar_str = f"{prefix}svar tame_settings {dump_json(svar_dict)}"
-
-    else:
-        svar_str = ""
-
-    if len(creature_errors) != 0:
-        color = "#CF142B"
-        thumb = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png"
-
-    else:
-
-        color_list = []
-        for creature_name, creature_value in svar_dict["creatures"].items():
-            if "color" in creature_value.keys():
-                color_list.append(creature_value["color"])
+            if len(color_list) > 0:
+                color = randchoice(color_list)
 
             else:
-                pass
+                color = ""
 
-        if len(color_list) > 0:
-            color = randchoice(color_list)
+
+
+            return f"{prefix}embed -title 'Adding {creature_name} to the Taming Settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
         else:
-            color = ""
+            creature_errors[creature_name].insert(0, "**Errors:**")
 
-        thumb = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(creature_errors[creature_name]) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
 
-    return f"{prefix}embed -title 'Importing Creatures' -f '" + "\n".join(output_list) + f"' -thumb '{thumb}' -color '{color}' -footer '{prefix}tame settings import [JSON string] | {date} | ShadowsStride'", svar_str
-
-
-    # return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '<insert error>' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings import [JSON string] | {date} | ShadowsStride'", ""
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Creature name must be the first argument and cannot start with -' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
 
 
-input_dict = %*%
-embed_str, svar_str = main(input_dict)
+embed_str, svar_str = main(&ARGS&)
 
 
 </drac2>
