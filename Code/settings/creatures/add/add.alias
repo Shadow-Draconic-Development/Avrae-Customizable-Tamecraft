@@ -209,8 +209,17 @@ def main(input_list: list[str]) -> tuple(str, str):
         default_settings = {
             "cost": 0,
             "xp": 0,
-            "color":
+            "color": ""
         }
+
+        if (svar_test := get_svar("tame_settings")):
+            svar_dict = load_json(svar_test)
+
+        else:
+            svar_dict = {
+                "creatures": {},
+                "settings": {}
+            }
 
     else:
         return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected at least creature name, successes, failures, cooldown, and DC' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
@@ -226,7 +235,7 @@ def main(input_list: list[str]) -> tuple(str, str):
             "succ": args.last("succ", default=False),
             "fail": args.last("fail", default=False), 
             "cooldown": args.last("cooldown", default=False),
-            "DC": args.last("dc", default=False)
+            "dc": args.last("dc", default=False)
             }
 
         label_map = {
