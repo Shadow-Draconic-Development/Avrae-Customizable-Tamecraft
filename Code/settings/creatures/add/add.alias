@@ -286,8 +286,6 @@ def main(input_list: list[str]) -> tuple(str, str):
             else:
                 color = ""
 
-
-
             return f"{prefix}embed -title 'Adding {creature_name} to the Taming Settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
         else:
