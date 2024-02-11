@@ -23,20 +23,68 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def main(input_list: list[str]) -> tuple(str, str):
-    
+def main() -> tuple(str, str):
+
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        if "settings" in svar_dict.keys():
+
+            if "success_threshold" in svar_dict["settings"]:
+                if "-999" in svar_dict["settings"]["succes_threshold"]:
+                    pass
+
+                else:
+                    svar_dict["settings"]["success_threshold"]["-999"] = 1 
+
+            else:
+                svar_dict["settings"]["success_threshold"] = {
+                    "-999": 1,
+                    "5": 2,
+                    "10": 3,
+                    "15": 4,
+                    "20": 5
+                }
+
+        else:
+            svar_dict["settings"] = {
+                "success_threshold": {
+                    "-999": 1,
+                    "5": 2,
+                    "10": 3,
+                    "15": 4,
+                    "20": 5
+                }
+            }
+
+    else:
+        svar_dict = {
+            "creatures": {},
+            "settings": {
+                "success_threshold": {
+                    "-999": 1,
+                    "5": 2,
+                    "10": 3,
+                    "15": 4,
+                    "20": 5
+                }
+            }
+        }
+
+    f_list = [f"{thresh}: {bonus}" for thresh, bonus in svar_dict["settings"]["success_threshold"].items()]
+    f_list.insert(0, "**Threshold Above DC: Bonus**\n\n*Current Settings:*")
+    f_list.append("")
+    f_list.append("*Default Settings:*")
+    f_list = f_list + [f"{thresh}: {bonus}" for thresh, bonus in {"-999":1,"5":2,"10":3,"15":4,"20":5}.items()]
+
+    return "Success Bonus Thresholds", "\n".join(f_list)
 
 
-
-
-
-
-
-
-
-
+title, f = main()
 
 
 </drac2>
-{{embed_str}}
-{{svar_str}}
+-title "{{title}}"
+-f "{{f}}"
+-thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+-footer "{{ctx.prefix}}tame settings success | 2/11/24 | ShadowsStride"
