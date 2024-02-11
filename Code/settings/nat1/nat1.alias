@@ -15,7 +15,7 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
     """
 
     # Finds at least 1 match
-    if len(item_results := [item for item in item_list if query.lower() in str(item).lower()]) > 0:
+    if len(item_results := [item for item in item_list if query.lower() in item.lower()]) > 0:
         return item_results
 
     # If it finds no matches
