@@ -35,7 +35,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
         if "settings" in svar_dict.keys():
 
-            if "whitelisted_channel_ids" in svar_dict["settings"]:
+            if "jack_of_trades" in svar_dict["settings"]:
                 pass
 
             else:
