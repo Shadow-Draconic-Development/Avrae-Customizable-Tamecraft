@@ -27,7 +27,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     prefix = ctx.prefix
     date = "2/11/24"
-    subalias_str = f"{prefix}tame settings jack <true/false>"
+    subalias_str = f"{prefix}tame settings lfg <true/false>"
 
 
     if (svar_test := get_svar("tame_settings")):
