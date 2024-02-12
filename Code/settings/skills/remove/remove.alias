@@ -1,0 +1,170 @@
+embed
+<drac2>
+
+def search_list(query: str, item_list: list[str]) -> list[str]|None:
+    """
+    Searches for item in list.
+
+    Args:
+        query (str): The query being made
+        item_list (list): List of items
+
+    Return:
+        list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
+    """
+
+    # Finds at least 1 match
+    if len(item_results := [item for item in item_list if query.lower() in str(item).lower()]) > 0:
+        return item_results
+
+    # If it finds no matches
+    else:
+        return None
+
+
+def main(input_list: list[str]) -> tuple(str, str):
+
+    date = "2/18/24"
+    prefix = ctx.prefix
+    subalias_str = f"{prefix}tame settings skills remove [skill name]"
+
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        if "settings" in svar_dict.keys():
+
+            if "skills" in svar_dict["settings"].keys():
+                pass
+
+            else:
+                svar_dict["settings"]["skills"] = [
+                    "animalHandling",
+                    "sleightOfHand",
+                    "nature",
+                    "survival"
+                    ]
+
+        else:
+            svar_dict["settings"] = {
+                "skills": [
+                    "animalHandling",
+                    "sleightOfHand",
+                    "nature",
+                    "survival"
+                    ]
+            }
+
+    else:
+        svar_dict = {
+            "creatures": {},
+            "settings": {
+                "skills": [
+                    "animalHandling",
+                    "sleightOfHand",
+                    "nature",
+                    "survival"
+                    ]
+            }
+        }
+
+    skills_colors = {
+    # Strength Skills
+    "strength": "#FF0000", # Red
+    "athletics": "#DC143C",  # Crimson
+
+    # Dexterity Skills
+    "dexterity": "#FFA500", # Orange
+    "acrobatics": "#FFBF00",  # Amber
+    "sleightOfHand": "#F3B300",  # Xanthous
+    "stealth": "#CC8F00",  # Harvest Gold
+
+    # Constitution Skills
+    "constitution": "#8F00FF",  # Violet
+
+    # Intelligence Skills
+    "intelligence": "#0000FF" # Blue
+    "arcana": "#2341DA",  # Palatinate Blue 
+    "history": "#3562C7",  # True Blue
+    "investigation": "#3E72BE",  # Celtic Blue
+    "nature": "#4682B4",  # Steel Blue
+    "religion": "#1E90FF",  # Dodger Blue
+
+    # Wisdom Skills
+    "wisdom": "#00FF00", # Green
+    "animalHandling": "#00D900",  # SGBUS Green
+    "insight": "#00B200",  # Kelly Green
+    "medicine": "#009F00",  # Forest Green
+    "perception": "#008B00",  # India Green
+    "survival": "#006400",  # Office Green
+
+    # Charisma Skills
+    "charisma": "#FFFF00", # Yellow
+    "deception": "#B89C00",  # Satin Sheen Gold
+    "intimidation": "#EED000",  # Citrine
+    "performance": "#FFE100",  # School Bus Yellow
+    "persuasion": "#FFEB00"  # Canary
+    }
+
+    if len(input_list) > 0:
+
+        if (search_result := search_list(input_list[0], skills_colors.keys())):
+
+            if len(search_result) == 1:
+                input_list[0] = search_result[0]
+
+            else:
+                found = False
+
+                for match in search_result:
+                    if match.lower() != input_list[0].lower():
+                        pass
+
+                    else:
+                        found = True
+                        input_list[0] = match
+                        break
+
+
+                if found:
+                    pass
+
+                else:
+                    search_result.insert(0, "**Multiple Skills Found:**")
+
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Invalid skill entered, refer to [Avrae Documentation](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics) for valid skills' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Expected a valid [skill name](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+    if input_list[0] in svar_dict["creatures"]["settings"]["skills"]:
+        svar_dict["creatures"]["settings"]["skills"].pop(input_list[0])
+
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Skill is not in skill list(`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+    if (search_result := search_list(randchoice(svar_dict["creatures"]["settings"]["skills"]), skills_colors.keys())):
+        color = skills_colors[search_result[0]]
+
+    else:
+        color = ""
+
+    f_list = ["**Skill Removed:**", f"{input_list[0]}\n"] + ["**Updated Skills:**"] + svar_dict["creatures"]["settings"]["skills"]
+
+    if svar_dict["creatures"]["settings"]["skills"] == ["animalHandling","sleightOfHand","nature","survival"]:
+        svar_dict["creatures"]["settings"].pop("skills")
+
+    else:
+        pass
+
+    return f"{prefix}embed -title 'Skills For Taming' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '{color}' -footer '{subalias_str}' | {date} | ShadowsStride", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+
+
+embed_str, svar_str = main(&ARGS&)
+
+
+</drac2>
+{{embed_str}}
+{{svar_str}}
