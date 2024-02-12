@@ -24,6 +24,10 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 def main(input_list: list[str]) -> tuple(str, str):
 
+    date = "2/18/24"
+    prefix = ctx.prefix
+    subalias_str = f"{prefix}tame settings skills add [skill name]"
+
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
@@ -94,21 +98,52 @@ def main(input_list: list[str]) -> tuple(str, str):
     "survival": "#006400",  # Office Green
 
     # Charisma Skills
-    "yellow": "#FFFF00", # Yellow
+    "charisma": "#FFFF00", # Yellow
     "deception": "#B89C00",  # Satin Sheen Gold
     "intimidation": "#EED000",  # Citrine
     "performance": "#FFE100",  # School Bus Yellow
     "persuasion": "#FFEB00"  # Canary
     }
 
-    
+    if len(input_list) > 0:
+
+        if (search_result := search_list(input_list[0], skills_colors.keys())):
+
+            if len(search_result) == 1:
+                input_list[0] = search_result[0]
+
+            else:
+                found = False
+
+                for match in search_result:
+                    if match.lower() != input_list[0].lower():
+                        pass
+
+                    else:
+                        found = True
+                        input_list[0] = match
+                        break
 
 
+                if found:
+                    pass
 
+                else:
+                    search_result.insert(0, "**Multiple Skills Found:**")
 
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
 
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Invalid skill entered, refer to [Avrae Documentation](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics) for valid skills' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
 
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Expected a valid [skill name](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
 
+    if not input_list[0] in svar_dict["creatures"]["settings"]["skills"]:
+        svar_dict["creatures"]["settings"]["skills"].append(input_list[0])
+
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Skill already exists (`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
 
     if (search_result := search_list(randchoice(svar_dict["creatures"]["settings"]["skills"]), skills_colors.keys())):
         color = skills_colors[search_result[0]]
@@ -116,15 +151,20 @@ def main(input_list: list[str]) -> tuple(str, str):
     else:
         color = ""
 
-    return "Skills For Taming", "\n".join(["**Current Skills:**"] + svar_dict["creatures"]["settings"]["skills"] + ["**Default Skills:**\n", "animalHandling", "sleightOfHand", "nature", "survival"]), color
+    f_list = ["**Skill Added:**", f"{input_list[0]}\n"] + ["**Updated Skills:**"] + svar_dict["creatures"]["settings"]["skills"]
+
+    if svar_dict["creatures"]["settings"]["skills"] == ["animalHandling","sleightOfHand","nature","survival"]:
+        svar_dict["creatures"]["settings"].pop("skills")
+
+    else:
+        pass
+
+    return f"{prefix}embed -title 'Skills For Taming' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '{color}' -footer '{subalias_str}' | {date} | ShadowsStride", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
 
-title, f, color = main()
+embed_str, svar_str = main(&ARGS&)
 
 
 </drac2>
--title "{{title}}"
--f "{{f}}"
--color "{{color}}"
--image "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
--footer "{{ctx.prefix}}tame settings skills | 2/12/24 | ShadowsStride"
+{{embed_str}}
+{{svar_str}}
