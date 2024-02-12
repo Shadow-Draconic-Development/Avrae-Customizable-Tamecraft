@@ -107,7 +107,7 @@ def main() -> tuple(str, str):
     else:
         color = ""
 
-    return "Skills For Taming", "\n".join(["**Current Skills:**"] + svar_dict["creatures"]["settings"]["skills"] + ["**Default Skills:**\n", "animalHandling", "sleightOfHand", "nature", "survival"]), color
+    return "Skills For Taming", "\n".join(["**Current Skills:**"] + svar_dict["creatures"]["settings"]["skills"] + ["\n**Default Skills:**", "animalHandling", "sleightOfHand", "nature", "survival"]), color
 
 
 title, f, color = main()
