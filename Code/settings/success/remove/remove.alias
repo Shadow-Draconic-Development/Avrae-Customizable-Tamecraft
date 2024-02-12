@@ -1,0 +1,93 @@
+multiline
+<drac2>
+
+
+def main(input_list: list[str]) -> tuple(str, str):
+
+    prefix = ctx.prefix
+    date = "2/12/24"
+    subalias_str = f"{prefix}tame settings success edit [threshold] [bonus]"
+
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        if "settings" in svar_dict.keys():
+
+            if "success_threshold" in svar_dict["settings"]:
+                if "-999" in svar_dict["settings"]["succes_threshold"]:
+                    pass
+
+                else:
+                    svar_dict["settings"]["success_threshold"]["-999"] = 1 
+
+            else:
+                svar_dict["settings"]["success_threshold"] = {
+                    "-999": 1,
+                    "5": 2,
+                    "10": 3,
+                    "15": 4,
+                    "20": 5
+                }
+
+        else:
+            svar_dict["settings"] = {
+                "success_threshold": {
+                    "-999": 1,
+                    "5": 2,
+                    "10": 3,
+                    "15": 4,
+                    "20": 5
+                }
+            }
+
+    else:
+        svar_dict = {
+            "creatures": {},
+            "settings": {
+                "success_threshold": {
+                    "-999": 1,
+                    "5": 2,
+                    "10": 3,
+                    "15": 4,
+                    "20": 5
+                }
+            }
+        }
+
+    if len(input_list) > 0:
+
+        if input_list[0] in svar_dict["settings"]["success_threshold"].keys():
+
+            bonus = svar_dict["settings"]["success_threshold"].pop(input_list[0])
+
+            svar_dict["settings"]["success_threshold"][input_list[0]] = input_list[1]
+
+            if svar_dict["settings"]["success_threshold"] == {"-999":1,"5":2,"10":3,"15":4,"20":5}:
+                current_values = svar_dict["settings"].pop("success_threshold")
+
+            else:
+                current_values = svar_dict["settings"]["success_threshold"]
+
+            f_list = [f"{thresh}: {bonus}" for thresh, bonus in current_values.items()]
+            f_list.insert(0, "**Threshold Above DC: Bonus**\n\n*Removed Settings:*")
+            f_list.insert(1, f"{input_list}: {bonus}\n\n*New Settings*")
+
+            f_list.append("")
+            f_list.append("*Default Settings:*")
+            f_list = f_list + [f"{thresh}: {bonus}" for thresh, bonus in {"-999":1,"5":2,"10":3,"15":4,"20":5}.items()]
+
+            return f"{prefix}embed -title 'Success Bonus Thresholds' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'That threshold does not exist, use `add` instead' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected number for threshold' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+
+embed_str, svar_str = main(&ARGS&)
+
+
+</drac2>
+{{embed_str}}
+{{svar_str}}
