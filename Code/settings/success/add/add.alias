@@ -5,7 +5,7 @@ multiline
 def main(input_list: list[str]) -> tuple(str, str):
 
     prefix = ctx.prefix
-    date = "2/11/24"
+    date = "2/12/24"
     subalias_str = f"{prefix}tame settings success add [threshold] [bonus]"
 
     if (svar_test := get_svar("tame_settings")):
@@ -83,6 +83,9 @@ def main(input_list: list[str]) -> tuple(str, str):
 
         except:
             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected numbers for the threshold and bonus' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected numbers for the threshold and bonus' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
 
 embed_str, svar_str = main(&ARGS&)
