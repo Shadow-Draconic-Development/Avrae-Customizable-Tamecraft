@@ -130,6 +130,8 @@ def main(input_list: list[str]) -> tuple(str, str):
                         else:
                             svar_dict["settings"]["jack_of_trades"] = False
 
+                        break
+
                 # If found exact match
                 if found:
                     pass
