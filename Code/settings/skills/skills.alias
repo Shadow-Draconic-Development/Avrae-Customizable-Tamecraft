@@ -22,7 +22,7 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def main(input_list: list[str]) -> tuple(str, str):
+def main() -> tuple(str, str):
 
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
