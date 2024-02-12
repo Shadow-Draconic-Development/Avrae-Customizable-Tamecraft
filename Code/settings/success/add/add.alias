@@ -70,7 +70,7 @@ def main(input_list: list[str]) -> tuple(str, str):
                 else:
                     current_values = svar_dict["settings"]["success_threshold"]
 
-                f_list = [f"{thresh}: {bonus}" for thresh, bonus in svar_dict["settings"]["success_threshold"].items()]
+                f_list = [f"{thresh}: {bonus}" for thresh, bonus in current_values.items()]
                 f_list.insert(0, "**Threshold Above DC: Bonus**\n\n*New Settings:*")
                 f_list.append("")
                 f_list.append("*Default Settings:*")
