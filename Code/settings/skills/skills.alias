@@ -94,7 +94,7 @@ def main() -> tuple(str, str):
     "survival": "#006400",  # Office Green
 
     # Charisma Skills
-    "yellow": "#FFFF00", # Yellow
+    "charisma": "#FFFF00", # Yellow
     "deception": "#B89C00",  # Satin Sheen Gold
     "intimidation": "#EED000",  # Citrine
     "performance": "#FFE100",  # School Bus Yellow
