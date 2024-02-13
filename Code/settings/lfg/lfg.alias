@@ -69,7 +69,7 @@ def main(input_list: list[str]) -> tuple(str, str):
                 "lfg_integration": default_value
             }
 
-    # If settings does not exist
+    # If SVAR does not exist
     else:
         svar_dict = {
             "creatures": {},
@@ -78,7 +78,7 @@ def main(input_list: list[str]) -> tuple(str, str):
             }
         }
 
-    # If no inputs, show current and default dettings
+    # If no inputs, show current and default settings
     if len(input_list) == 0:
         f_str = f"**Current Value:** {svar_dict['settings']['lfg_integration']}\n**Default Value:** {default_value}"
 
