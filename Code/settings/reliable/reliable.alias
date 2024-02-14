@@ -46,11 +46,11 @@ def main(input_list: list[str]) -> tuple(str, str):
     subalias_str = f"{prefix}tame settings jack <true/false>"
 
     # Grab title name and dictionary key
-    title = "Taming Settings: Pro-rated Refund"
-    dict_key = "pro_rate_refund"
+    title = "Taming Settings: Reliable Talent"
+    dict_key = "reliable_talent"
 
     # Set default value
-    default_value = True
+    default_value = False
 
 
     # If SVAR settings exists, load dictionary
