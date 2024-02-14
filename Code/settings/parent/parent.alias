@@ -24,94 +24,150 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 
 def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
 
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Embed string
+        str: SVAR change string
+    """
+
+
+    # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "2/11/24"
+    date = "2/13/24"
     subalias_str = f"{prefix}tame settings parent <true/false>"
 
+    # Set default value
+    default_value = False
 
+    # If SVAR settings exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # If settings exists
         if "settings" in svar_dict.keys():
 
+            # If parent_channel_inherit
             if "parent_channel_inherit" in svar_dict["settings"]:
                 pass
 
+            # If parent_channel_inherit
             else:
-                svar_dict["settings"]["parent_channel_inherit"] = False
+                svar_dict["settings"]["parent_channel_inherit"] = default_value
 
+        # If settings does not exist
         else:
             svar_dict["settings"] = {
-                "parent_channel_inherit": False
+                "parent_channel_inherit": default_value
             }
 
+    # If SVAR does not exist
     else:
         svar_dict = {
             "creatures": {},
             "settings": {
-                "parent_channel_inherit": False
+                "parent_channel_inherit": default_value
             }
         }
 
+    # If no inputs, show current and default settings
     if len(input_list) == 0:
-        f_str = f"**Current Value:** {svar_dict['settings']['parent_channel_inherit']}\n**Default Value:** False"
+        f_str = f"**Current Value:** {svar_dict['settings']['parent_channel_inherit']}\n**Default Value:** {default_value}"
 
         return f"{prefix}embed -title 'LFG Integration' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
+    # If inputs
     else:
+
+        # Collect current value and create valid true/false responses
+        old_value = svar_dict["settings"]["parent_channel_inherit"]
         true_list = ["True", "1", "yes"]
         false_list = ["False", "0", "no"]
 
+        # If input is in true/false lists
         if (search_result := search_list(input_list[0], true_list + false_list)):
 
+            # If there is exactly one match
             if len(search_result) == 1:
+
+                # If input is true
                 if search_result[0] in true_list:
                     svar_dict["settings"]["parent_channel_inherit"] = True
 
+                # If input is false
                 else:
                     svar_dict["settings"]["parent_channel_inherit"] = False
 
+            # If there is more one match
             else:
                 found = False
+
+                # For each match
                 for match in search_result:
+
+                    # If not exact match
                     if match.lower() != input_list.lower():
                         pass
 
+                    # If exact match
                     else:
                         found = True
+
+                        # If input is true
                         if match in true_list:
                             svar_dict["settings"]["parent_channel_inherit"] = True
 
+                        # If input is false
                         else:
                             svar_dict["settings"]["parent_channel_inherit"] = False
 
+                        break
+
+                # If found exact match
                 if found:
                     pass
 
+                # If not found exact match, try to see if matches are in same list
                 else:
                     match len(set(true_list).insersection(set(search_result))):
 
+                        # All matches are true
                         case len(search_result):
                             svar_dict["settings"]["parent_channel_inherit"] = True
 
+                        # All matches are false
                         case 0:
                             svar_dict["settings"]["parent_channel_inherit"] = False
 
+                        # Matches are true and false
                         case _:
-                            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Input matches both False and True arguments, please try again with a more concise input' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+                            search_result.insert(0, "**Multiple Matches Found:**")
 
-        if not svar_dict["settings"]["parent_channel_inherit"]:
+                            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+        # If not in true/false lists
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Invalid input (`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+        # If default setting, remove entry
+        if svar_dict["settings"]["parent_channel_inherit"] == default_value:
             new_val = svar_dict["settings"].pop("parent_channel_inherit")
 
+        # If not default setting
         else:
-            new_val = True
+            new_val = svar_dict["settings"]["parent_channel_inherit"]
 
-        f_str = f"**New Value:** {new_val}\n**Default Value:** False"
+        # Construct body content
+        f_str = f"**New Value:** {new_val}\n**Old Value:** {old_value}"
 
         return f"{prefix}embed -title 'Parent Channel Inherit' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
                             
-                        
+
+# Main program function         
 embed_str, svar_str = main(&ARGS&)
 
 
