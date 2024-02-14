@@ -60,11 +60,11 @@ def main(input_list: list[str]) -> tuple(str, str):
         # If settings exists
         if "settings" in svar_dict.keys():
 
-            # If jack_of_trades exists
+            # If key exists
             if dict_key in svar_dict["settings"]:
                 pass
 
-            # If jack_of_trades does not exist
+            # If key does not exist
             else:
                 svar_dict["settings"][dict_key] = default_value
 
@@ -85,7 +85,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # If no inputs, show current and default settings
     if len(input_list) == 0:
-        f_str = f"**Current Value:** {svar_dict['settings']['jack_of_trades']}\n**Default Value:** {default_value}"
+        f_str = f"**Current Value:** {svar_dict['settings'][dict_key]}\n**Default Value:** {default_value}"
 
         return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 

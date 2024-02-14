@@ -20,7 +20,7 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
     """
 
     # Finds at least 1 match
-    if len(item_results := [item for item in item_list if query.lower() in str(item).lower()]) > 0:
+    if len(item_results := [item for item in item_list if query.lower() in item.lower()]) > 0:
         return item_results
 
     # If it finds no matches
@@ -42,11 +42,16 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "2/11/24"
+    date = "2/13/24"
     subalias_str = f"{prefix}tame settings lfg <true/false>"
+
+    # Grab title name and dictionary key
+    title = "Taming Settings: LFG Integration"
+    dict_key = "lfg_integration"
 
     # Set default value
     default_value = False
+
 
     # If SVAR settings exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
@@ -55,56 +60,56 @@ def main(input_list: list[str]) -> tuple(str, str):
         # If settings exists
         if "settings" in svar_dict.keys():
 
-            # If lfg_integration exists
-            if "lfg_integration" in svar_dict["settings"]:
+            # If key exists
+            if dict_key in svar_dict["settings"]:
                 pass
 
-            # If lfg_integration does not exist
+            # If key does not exist
             else:
-                svar_dict["settings"]["lfg_integration"] = default_value
+                svar_dict["settings"][dict_key] = default_value
 
         # If settings does not exist
         else:
             svar_dict["settings"] = {
-                "lfg_integration": default_value
+                dict_key: default_value
             }
 
-    # If SVAR does not exist
+    # If SVAR settings does not exist, load default dictionary
     else:
         svar_dict = {
             "creatures": {},
             "settings": {
-                "lfg_integration": default_value
+                dict_key: default_value
             }
         }
 
     # If no inputs, show current and default settings
     if len(input_list) == 0:
-        f_str = f"**Current Value:** {svar_dict['settings']['lfg_integration']}\n**Default Value:** {default_value}"
+        f_str = f"**Current Value:** {svar_dict['settings'][dict_key]}\n**Default Value:** {default_value}"
 
-        return f"{prefix}embed -title 'LFG Integration' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
-    # If inputs
+    # If inputs 
     else:
 
         # Collect current value and create valid true/false responses
-        old_value = svar_dict["settings"]["lfg_integration"]
+        old_value = svar_dict["settings"][dict_key]
         true_list = ["True", "1", "yes"]
         false_list = ["False", "0", "no"]
 
         # If input is in true/false lists
         if (search_result := search_list(input_list[0], true_list + false_list)):
 
-            # If there is currently one match
+            # If there is exactly one match
             if len(search_result) == 1:
 
                 # If input is true
                 if search_result[0] in true_list:
-                    svar_dict["settings"]["lfg_integration"] = True
+                    svar_dict["settings"][dict_key] = True
 
                 # If input is false
                 else:
-                    svar_dict["settings"]["lfg_integration"] = False
+                    svar_dict["settings"][dict_key] = False
 
             # If there is more than one match
             else:
@@ -123,11 +128,11 @@ def main(input_list: list[str]) -> tuple(str, str):
 
                         # If input is true
                         if match in true_list:
-                            svar_dict["settings"]["lfg_integration"] = True
+                            svar_dict["settings"][dict_key] = True
 
                         # If input is false
                         else:
-                            svar_dict["settings"]["lfg_integration"] = False
+                            svar_dict["settings"][dict_key] = False
 
                         break
 
@@ -141,11 +146,11 @@ def main(input_list: list[str]) -> tuple(str, str):
 
                         # All matches are true
                         case len(search_result):
-                            svar_dict["settings"]["lfg_integration"] = True
+                            svar_dict["settings"][dict_key] = True
 
                         # All matches are false
                         case 0:
-                            svar_dict["settings"]["lfg_integration"] = False
+                            svar_dict["settings"][dict_key] = False
 
                         # Matches are true and false
                         case _:
@@ -158,20 +163,20 @@ def main(input_list: list[str]) -> tuple(str, str):
             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Invalid input (`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
         # If default setting, remove entry
-        if svar_dict["settings"]["lfg_integration"] == default_value:
-            new_val = svar_dict["settings"].pop("lfg_integration")
+        if svar_dict["settings"][dict_key] == default_value:
+            new_val = svar_dict["settings"].pop(dict_key)
 
         # If not default setting
         else:
-            new_val = svar_dict["settings"]["lfg_integration"]
+            new_val = svar_dict["settings"][dict_key]
 
         # Construct body content
         f_str = f"**New Value:** {new_val}\n**Old Value:** {old_value}"
 
-        return f"{prefix}embed -title 'LFG Integration' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+                            
 
-
-# Main program function             
+# Main program function                        
 embed_str, svar_str = main(&ARGS&)
 
 
