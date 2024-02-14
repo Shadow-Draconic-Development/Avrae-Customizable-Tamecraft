@@ -74,17 +74,45 @@ def main(input_list: list[str]) -> tuple(str, str):
             # Collect current value
             old_value = svar_dict["settings"][dict_key]
 
-            # If number is less than or equal to 0
-            if (bonus := int(input_list[0])) <= 0:
-                svar_dict["settings"][dict_key] = bonus
+            # If default is meant to be a penalty
+            if default_value < 0:
 
-            # If number is greater than 0
+                # If number is less than or equal to 0
+                if (bonus := int(input_list[0])) <= 0:
+                    svar_dict["settings"][dict_key] = bonus
+
+                # If number is greater than 0
+                else:
+                    svar_dict["settings"][dict_key] = 0
+
+            # If default is meant to be a bonus
+            elif default_value > 0:
+
+                # If number is greater than or equal to 0
+                if (bonus := int(input_list[0])) >= 0:
+                    svar_dict["settings"][dict_key] = bonus
+
+                # If number is greater than 0
+                else:
+                    svar_dict["settings"][dict_key] = 0        
+
+            # Either bonus or penalty
             else:
-                svar_dict["settings"][dict_key] = 0
+                svar_dict["settings"][dict_key] = int(input_list[0])
 
         # If input was not a number (error)
         except:
-            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a non-positive number' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+            if default_value < 0:
+                f_str = " non-positive"
+
+            elif default_value > 0:
+                f_str = " non-negative"
+
+            else:
+                f_str = ""
+
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a{f_str} number' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
         # If default setting, remove entry
         if svar_dict["settings"][dict_key] == default_value:
