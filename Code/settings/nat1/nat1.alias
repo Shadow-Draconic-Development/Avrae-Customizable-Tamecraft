@@ -21,8 +21,12 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "2/12/24"
+    date = "2/14/24"
     subalias_str = f"{prefix}tame settings nat1 <#>"
+
+    # Grab title name and dictionary key
+    title = "Taming Settings: Nat1 Penalty"
+    dict_key = "nat1"
 
     # Set default value
     default_value = -1
@@ -34,18 +38,18 @@ def main(input_list: list[str]) -> tuple(str, str):
         # If settings exists
         if "settings" in svar_dict.keys():
 
-            # If nat1 exists
-            if "nat1" in svar_dict["settings"]:
+            # If key exists
+            if dict_key in svar_dict["settings"]:
                 pass
 
-            # If nat1 does not exist
+            # If key does not exist
             else:
-                svar_dict["settings"]["nat1"] = default_value
+                svar_dict["settings"][dict_key] = default_value
 
         # If settings does not exist
         else:
             svar_dict["settings"] = {
-                "nat1": default_value
+                dict_key: default_value
             }
 
     # If SVAR does not exist
@@ -53,47 +57,47 @@ def main(input_list: list[str]) -> tuple(str, str):
         svar_dict = {
             "creatures": {},
             "settings": {
-                "nat1": default_value
+                dict_key: default_value
             }
         }
 
     # If no inputs, show current and default settings
     if len(input_list) == 0:
-        f_str = f"**Current Value:** {svar_dict['settings']['nat1']}\n**Default Value:** {default_value}"
+        f_str = f"**Current Value:** {svar_dict['settings'][dict_key]}\n**Default Value:** {default_value}"
 
-        return f"{prefix}embed -title 'Nat1 Penalty' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
     # If inputs and no errors
     else:
         try:
 
             # Collect current value
-            old_value = svar_dict["settings"]["nat1"]
+            old_value = svar_dict["settings"][dict_key]
 
-            # If bonus is less than or equal to 0
+            # If number is less than or equal to 0
             if (bonus := int(input_list[0])) <= 0:
-                svar_dict["settings"]["nat1"] = bonus
+                svar_dict["settings"][dict_key] = bonus
 
-            # If bonus is greater than 0
+            # If number is greater than 0
             else:
-                svar_dict["settings"]["nat1"] = 0
+                svar_dict["settings"][dict_key] = 0
 
         # If input was not a number (error)
         except:
             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a non-positive number' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
         # If default setting, remove entry
-        if svar_dict["settings"]["nat1"] == default_value:
-            new_val = svar_dict["settings"].pop("nat1")
+        if svar_dict["settings"][dict_key] == default_value:
+            new_val = svar_dict["settings"].pop(dict_key)
 
         # If not default setting
         else:
-            new_val = svar_dict["settings"]["nat1"]
+            new_val = svar_dict["settings"][dict_key]
 
         # Construct body content
         f_str = f"**New Value:** {new_val}\n**Old Value:** {old_value}"
 
-        return f"{prefix}embed -title 'Nat1 Penalty' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
 
 # Main program function
