@@ -21,8 +21,12 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "2/13/24"
+    date = "2/14/24"
     subalias_str = f"{prefix}tame settings nat20 <#>"
+
+    # Grab title name and dictionary key
+    title = "Taming Settings: Nat20 Bonus"
+    dict_key = "nat20"
 
     # Set default value
     default_value = 5
@@ -34,18 +38,18 @@ def main(input_list: list[str]) -> tuple(str, str):
         # If settings exists
         if "settings" in svar_dict.keys():
 
-            # If nat20 exists
-            if "nat20" in svar_dict["settings"]:
+            # If key exists
+            if dict_key in svar_dict["settings"]:
                 pass
 
-            # If nat20 does not exist
+            # If key does not exist
             else:
-                svar_dict["settings"]["nat20"] = default_value
+                svar_dict["settings"][dict_key] = default_value
 
         # If settings does not exist
         else:
             svar_dict["settings"] = {
-                "nat20": default_value
+                dict_key: default_value
             }
 
     # If SVAR does not exist
@@ -53,47 +57,76 @@ def main(input_list: list[str]) -> tuple(str, str):
         svar_dict = {
             "creatures": {},
             "settings": {
-                "nat20": default_value
+                dict_key: default_value
             }
         }
 
     # If no inputs, show current and default settings
     if len(input_list) == 0:
-        f_str = f"**Current Value:** {svar_dict['settings']['nat20']}\n**Default Value:** {default_value}"
+        f_str = f"**Current Value:** {svar_dict['settings'][dict_key]}\n**Default Value:** {default_value}"
 
-        return f"{prefix}embed -title 'Nat20 Bonus' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
-    # If inputs
+    # If inputs and no errors
     else:
         try:
 
             # Collect current value
-            old_value = svar_dict["settings"]["nat20"]
+            old_value = svar_dict["settings"][dict_key]
 
-            # If bonus is greater than or equal to 0
-            if (bonus := int(input_list[0])) >= 0:
-                svar_dict["settings"]["nat20"] = bonus
+            # If default is meant to be a penalty
+            if default_value < 0:
 
-            # If bonus is greater than 0
+                # If number is less than or equal to 0
+                if (bonus := int(input_list[0])) <= 0:
+                    svar_dict["settings"][dict_key] = bonus
+
+                # If number is greater than 0
+                else:
+                    svar_dict["settings"][dict_key] = 0
+
+            # If default is meant to be a bonus
+            elif default_value > 0:
+
+                # If number is greater than or equal to 0
+                if (bonus := int(input_list[0])) >= 0:
+                    svar_dict["settings"][dict_key] = bonus
+
+                # If number is greater than 0
+                else:
+                    svar_dict["settings"][dict_key] = 0        
+
+            # Either bonus or penalty
             else:
-                svar_dict["settings"]["nat20"] = 0
+                svar_dict["settings"][dict_key] = int(input_list[0])
 
         # If input was not a number (error)
         except:
-            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a non-negative number' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+            if default_value < 0:
+                f_str = " non-positive"
+
+            elif default_value > 0:
+                f_str = " non-negative"
+
+            else:
+                f_str = ""
+
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a{f_str} number' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
         # If default setting, remove entry
-        if svar_dict["settings"]["nat20"] == default_value:
-            new_val = svar_dict["settings"].pop("nat20")
+        if svar_dict["settings"][dict_key] == default_value:
+            new_val = svar_dict["settings"].pop(dict_key)
 
         # If not default setting
         else:
-            new_val = svar_dict["settings"]["nat20"]
+            new_val = svar_dict["settings"][dict_key]
 
+        # Construct body content
         f_str = f"**New Value:** {new_val}\n**Old Value:** {old_value}"
 
-        return f"{prefix}embed -title 'Nat20 Bonus' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
-                            
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+
 
 # Main program function
 embed_str, svar_str = main(&ARGS&)
