@@ -154,6 +154,10 @@ def main(input_list: list[str]) -> tuple(str, str):
 
                             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
+        # If not in true/false lists
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Invalid input (`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
         # If default setting, remove entry
         if svar_dict["settings"]["jack_of_trades"] == default_value:
             new_val = svar_dict["settings"].pop("jack_of_trades")
