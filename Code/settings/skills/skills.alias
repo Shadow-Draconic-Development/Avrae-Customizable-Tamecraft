@@ -22,44 +22,57 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def main() -> tuple(str, str):
+def main() -> tuple(str, str, str):
+    """
+    Main program function
 
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Title
+        str: Body content
+        str: Color hex code
+    """
+
+    # Set default value
+    default_value = [
+        "animalHandling",
+        "sleightOfHand",
+        "nature",
+        "survival"
+    ]
+
+    # Grab title name
+    title = "Taming Settings: Valid Skills"
+
+    # If SVAR settings exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # If settings exists
         if "settings" in svar_dict.keys():
 
+            # If key exists
             if "skills" in svar_dict["settings"].keys():
                 pass
 
+            # If key does not exist
             else:
-                svar_dict["settings"]["skills"] = [
-                    "animalHandling",
-                    "sleightOfHand",
-                    "nature",
-                    "survival"
-                    ]
+                svar_dict["settings"]["skills"] = default_value
 
+        # If settings does not exist
         else:
             svar_dict["settings"] = {
-                "skills": [
-                    "animalHandling",
-                    "sleightOfHand",
-                    "nature",
-                    "survival"
-                    ]
+                "skills": default_value
             }
 
+    # If SVAR settings does not exist, load default dictionary
     else:
         svar_dict = {
             "creatures": {},
             "settings": {
-                "skills": [
-                    "animalHandling",
-                    "sleightOfHand",
-                    "nature",
-                    "survival"
-                    ]
+                "skills": default_value
             }
         }
 
@@ -78,7 +91,7 @@ def main() -> tuple(str, str):
     "constitution": "#8F00FF",  # Violet
 
     # Intelligence Skills
-    "intelligence": "#0000FF" # Blue
+    "intelligence": "#0000FF", # Blue
     "arcana": "#2341DA",  # Palatinate Blue 
     "history": "#3562C7",  # True Blue
     "investigation": "#3E72BE",  # Celtic Blue
@@ -101,15 +114,70 @@ def main() -> tuple(str, str):
     "persuasion": "#FFEB00"  # Canary
     }
 
-    if (search_result := search_list(randchoice(svar_dict["creatures"]["settings"]["skills"]), skills_colors.keys())):
-        color = skills_colors[search_result[0]]
+    skill_mapping = {
+    # Strength Skills
+    "strength": "Strength",
+    "athletics": "Athletics",
 
+    # Dexterity Skills
+    "dexterity": "Dexterity",
+    "acrobatics": "Acrobatics",
+    "sleightOfHand": "Sleight of Hand",
+    "stealth": "Stealth",
+
+    # Constitution Skills
+    "constitution": "Constitution",
+
+    # Intelligence Skills
+    "intelligence": "Intelligence",
+    "arcana": "Arcana",
+    "history": "History",
+    "investigation": "Investigation",
+    "nature": "Nature",
+    "religion": "Religion",
+
+    # Wisdom Skills
+    "wisdom": "Wisdom",
+    "animalHandling": "Animal Handling",
+    "insight": "Insight",
+    "medicine": "Medicine",
+    "perception": "Perception",
+    "survival": "Survival",
+
+    # Charisma Skills
+    "charisma": "Charisma",
+    "deception": "Deception",
+    "intimidation": "Intimidation",
+    "performance": "Performance",
+    "persuasion": "Persuasion"
+    }
+
+    # If there is at least one skill in list
+    if len(svar_dict["settings"]["skills"]) > 0:
+
+        # If random skill name is found
+        if (search_result := search_list(randchoice(svar_dict["settings"]["skills"]), skills_colors.keys())):
+            color = skills_colors[search_result[0]]
+
+        # If random skill name is not found
+        else:
+            color = ""
+
+        # Construct skill string
+        skill_str = "\n".join([skill_mapping[skill] for skill in svar_dict["settings"]["skills"]])
+
+    # If there are no skills listed, collect random color and construct skill string
     else:
-        color = ""
+        color = skills_colors[randchoice(list(skills_colors.keys()))]
+        skill_str = "All skills"
 
-    return "Skills For Taming", "\n".join(["**Current Skills:**"] + svar_dict["creatures"]["settings"]["skills"] + ["\n**Default Skills:**", "animalHandling", "sleightOfHand", "nature", "survival"]), color
+    # Sort default values
+    default_value.sort()
+
+    return title, "\n".join(["**Current Skills:**", skill_str, "\n**Default Skills:**", "\n".join([skill_mapping[skill] for skill in default_value])]), color
 
 
+# Main program function
 title, f, color = main()
 
 
@@ -117,5 +185,5 @@ title, f, color = main()
 -title "{{title}}"
 -f "{{f}}"
 -color "{{color}}"
--image "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
--footer "{{ctx.prefix}}tame settings skills | 2/12/24 | ShadowsStride"
+-thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+-footer "{{ctx.prefix}}tame settings skills | 2/14/24 | ShadowsStride"
