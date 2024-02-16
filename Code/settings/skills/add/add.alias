@@ -1,4 +1,4 @@
-embed
+multiline
 <drac2>
 
 def search_list(query: str, item_list: list[str]) -> list[str]|None:
@@ -23,47 +23,58 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 
 def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
 
-    date = "2/18/24"
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Embed string
+        str: SVAR string 
+    """
+
+    # Grab date, prefix, subalias string, and title
+    date = "2/16/24"
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings skills add [skill name]"
+    title = "Taming Settings: Valid Skills"
 
+    # Set default value
+    default_value = [
+        "animalHandling",
+        "sleightOfHand",
+        "nature",
+        "survival"
+    ]
+
+    # If SVAR exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # If settings exists
         if "settings" in svar_dict.keys():
 
+            # If skills exists
             if "skills" in svar_dict["settings"].keys():
                 pass
 
+            # If skills does not exist
             else:
-                svar_dict["settings"]["skills"] = [
-                    "animalHandling",
-                    "sleightOfHand",
-                    "nature",
-                    "survival"
-                    ]
+                svar_dict["settings"]["skills"] = default_value[:]
 
+        # If settings does not exist
         else:
             svar_dict["settings"] = {
-                "skills": [
-                    "animalHandling",
-                    "sleightOfHand",
-                    "nature",
-                    "survival"
-                    ]
+                "skills": default_value[:]
             }
 
+    # If SVAR does not exist
     else:
         svar_dict = {
             "creatures": {},
             "settings": {
-                "skills": [
-                    "animalHandling",
-                    "sleightOfHand",
-                    "nature",
-                    "survival"
-                    ]
+                "skills": default_value[:]
             }
         }
 
@@ -82,7 +93,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     "constitution": "#8F00FF",  # Violet
 
     # Intelligence Skills
-    "intelligence": "#0000FF" # Blue
+    "intelligence": "#0000FF", # Blue
     "arcana": "#2341DA",  # Palatinate Blue 
     "history": "#3562C7",  # True Blue
     "investigation": "#3E72BE",  # Celtic Blue
@@ -105,63 +116,149 @@ def main(input_list: list[str]) -> tuple(str, str):
     "persuasion": "#FFEB00"  # Canary
     }
 
+    skill_mapping = {
+    # Strength Skills
+    "strength": "Strength",
+    "athletics": "Athletics",
+
+    # Dexterity Skills
+    "dexterity": "Dexterity",
+    "acrobatics": "Acrobatics",
+    "sleightOfHand": "Sleight of Hand",
+    "stealth": "Stealth",
+
+    # Constitution Skills
+    "constitution": "Constitution",
+
+    # Intelligence Skills
+    "intelligence": "Intelligence",
+    "arcana": "Arcana",
+    "history": "History",
+    "investigation": "Investigation",
+    "nature": "Nature",
+    "religion": "Religion",
+
+    # Wisdom Skills
+    "wisdom": "Wisdom",
+    "animalHandling": "Animal Handling",
+    "insight": "Insight",
+    "medicine": "Medicine",
+    "perception": "Perception",
+    "survival": "Survival",
+
+    # Charisma Skills
+    "charisma": "Charisma",
+    "deception": "Deception",
+    "intimidation": "Intimidation",
+    "performance": "Performance",
+    "persuasion": "Persuasion"
+    }
+
+    # If inputs
     if len(input_list) > 0:
 
+        # If valid skill is inputted
         if (search_result := search_list(input_list[0], skills_colors.keys())):
 
+            # If only match is found
             if len(search_result) == 1:
                 input_list[0] = search_result[0]
 
+            # If more than one match
             else:
                 found = False
 
+                # For each match found
                 for match in search_result:
+
+                    # If match does not exactly match
                     if match.lower() != input_list[0].lower():
                         pass
 
+                    # If exact match
                     else:
                         found = True
                         input_list[0] = match
                         break
 
-
+                # If match found
                 if found:
                     pass
 
+                # If match not found, construct output
                 else:
+                    search_result = [skill_mapping[skill] for skill in search_result]
                     search_result.insert(0, "**Multiple Skills Found:**")
 
-                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
+        # If valid skill is not inputted
         else:
-            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Invalid skill entered, refer to [Avrae Documentation](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics) for valid skills' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
 
+            # If Sleight of Hand
+            if "of" in input_list[0].lower() or "sleight" in input_list[0].lower() or ("hand" in input_list[0].lower() and "handl" not in input_list[0].lower()):
+                input_list[0] = "sleightOfHand"
+
+            # If Animal Handling
+            elif "animal" in input_list[0].lower() or "handling" in input_list[0].lower():
+                input_list[0] = "animalHandling"
+
+            # If neither of those
+            else:
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Invalid skill entered, refer to [Avrae Documentation](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics) for valid skills' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+
+    # If no inputs provided
     else:
-        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Expected a valid [skill name](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a valid [skill name](https://avrae.readthedocs.io/en/latest/aliasing/api.html#aliasing.api.statblock.AliasSkills.acrobatics)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
-    if not input_list[0] in svar_dict["creatures"]["settings"]["skills"]:
-        svar_dict["creatures"]["settings"]["skills"].append(input_list[0])
+    # If skill does not exist in list
+    if not input_list[0] in svar_dict["settings"]["skills"]:
+        svar_dict["settings"]["skills"].append(input_list[0])
 
+    # If skill does exist in list
     else:
-        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f'Skill already exists (`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'"
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Skill already exists (`{input_list[0]}`)' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
-    if (search_result := search_list(randchoice(svar_dict["creatures"]["settings"]["skills"]), skills_colors.keys())):
-        color = skills_colors[search_result[0]]
+    # If there are skills stored, search for color hex code
+    if len(svar_dict["settings"]["skills"]) > 0:
 
+        # If color found
+        if (search_result := search_list(randchoice(svar_dict["settings"]["skills"]), skills_colors.keys())):
+            color = skills_colors[search_result[0]]
+
+        # If color not found, choose random color
+        else:
+            color = skills_colors[randchoice(list(skills_colors.keys()))]
+
+        # Construct skill string
+        skill_str = "\n".join([skill_mapping[skill] for skill in svar_dict["settings"]["skills"]])
+
+    # If no skills are stored, pick random color
     else:
-        color = ""
+        color = skills_colors[randchoice(list(skills_colors.keys()))]
 
-    f_list = ["**Skill Added:**", f"{input_list[0]}\n"] + ["**Updated Skills:**"] + svar_dict["creatures"]["settings"]["skills"]
+        # Construct skill string
+        skill_str = "All skills"
 
-    if svar_dict["creatures"]["settings"]["skills"] == ["animalHandling","sleightOfHand","nature","survival"]:
-        svar_dict["creatures"]["settings"].pop("skills")
+    # Construct output
+    f_list = ["**Skill Added:**", f"{skill_mapping[input_list[0]]}\n", "**Updated Skills:**", skill_str]
 
+    # Sort lists for comparison
+    svar_dict["settings"]["skills"].sort()
+    default_value.sort()
+
+    # If skills are the default skills, remove skills
+    if svar_dict["settings"]["skills"] == default_value:
+        svar_dict["settings"].pop("skills")
+
+    # If skills are not the default skills
     else:
         pass
 
-    return f"{prefix}embed -title 'Skills For Taming' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '{color}' -footer '{subalias_str}' | {date} | ShadowsStride", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+    return f"{prefix}embed -title '{title}' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}" 
 
 
+# Main program function
 embed_str, svar_str = main(&ARGS&)
 
 
