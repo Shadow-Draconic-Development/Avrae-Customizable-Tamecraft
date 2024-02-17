@@ -1,86 +1,103 @@
 multiline
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
 def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
 
+    Args:
+        input_list (list[str]): List of user inputs
+
+
+    Return:
+        str: Embed string
+        str: SVAR string
+    """
+
+    # Grab prefix, date, and subalias string
     prefix = ctx.prefix
-    date = "2/12/24"
+    date = "2/16/24"
     subalias_str = f"{prefix}tame settings success edit [threshold] [bonus]"
 
+    # Set default value
+    default_value = {
+        "-999": 1,
+        "5": 2,
+        "10": 3,
+        "15": 4,
+        "20": 5
+    }
+
+    # If SVAR exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # If settings exists
         if "settings" in svar_dict.keys():
 
+            # If success threshold exists
             if "success_threshold" in svar_dict["settings"]:
-                if "-999" in svar_dict["settings"]["succes_threshold"]:
+
+                # If -999 threshold exists
+                if "-999" in svar_dict["settings"]["success_threshold"]:
                     pass
 
+                # If -999 threshold does not exist
                 else:
                     svar_dict["settings"]["success_threshold"]["-999"] = 1 
 
+            # If success threshold does not exist
             else:
-                svar_dict["settings"]["success_threshold"] = {
-                    "-999": 1,
-                    "5": 2,
-                    "10": 3,
-                    "15": 4,
-                    "20": 5
-                }
+                svar_dict["settings"]["success_threshold"] = default_value.copy()
 
+        # If settings do not exist
         else:
             svar_dict["settings"] = {
-                "success_threshold": {
-                    "-999": 1,
-                    "5": 2,
-                    "10": 3,
-                    "15": 4,
-                    "20": 5
-                }
+                "success_threshold": default_value.copy()
             }
 
+    # If SVAR does not exist
     else:
         svar_dict = {
             "creatures": {},
             "settings": {
-                "success_threshold": {
-                    "-999": 1,
-                    "5": 2,
-                    "10": 3,
-                    "15": 4,
-                    "20": 5
-                }
+                "success_threshold": default_value.copy()
             }
         }
 
+    # If it least one input
     if len(input_list) > 0:
 
+        # If threshold exists
         if input_list[0] in svar_dict["settings"]["success_threshold"].keys():
 
+            # Remove and store bonus value
             bonus = svar_dict["settings"]["success_threshold"].pop(input_list[0])
 
-            svar_dict["settings"]["success_threshold"][input_list[0]] = input_list[1]
-
-            if svar_dict["settings"]["success_threshold"] == {"-999":1,"5":2,"10":3,"15":4,"20":5}:
+            # If default thresholds are equal to the default value, remove succesS_threshold
+            if svar_dict["settings"]["success_threshold"] == default_value:
                 current_values = svar_dict["settings"].pop("success_threshold")
 
+            # If not default threshold
             else:
                 current_values = svar_dict["settings"]["success_threshold"]
 
-            f_list = [f"{thresh}: {bonus}" for thresh, bonus in current_values.items()]
-            f_list.insert(0, "**Threshold Above DC: Bonus**\n\n*Removed Settings:*")
-            f_list.insert(1, f"{input_list}: {bonus}\n\n*New Settings*")
+            # Construct output
+            f_list = ["**Threshold Above DC: Bonus**\n", "*Removed Setting:*", f"**{input_list[0]}:** {bonus}", "\n*Updated Settings:*"] + [f"**{thresh}:** {bonus}" for thresh, bonus in current_values.items()]
 
-            f_list.append("")
-            f_list.append("*Default Settings:*")
-            f_list = f_list + [f"{thresh}: {bonus}" for thresh, bonus in {"-999":1,"5":2,"10":3,"15":4,"20":5}.items()]
+            return f"{prefix}embed -title 'Taming Settings: Success Threshold Bonuses' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
-            return f"{prefix}embed -title 'Success Bonus Thresholds' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
-
+        # If threshold does not exist
         else:
             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'That threshold does not exist, use `add` instead' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
+    # If zero inputs
     else:
         return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected number for threshold' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
 
