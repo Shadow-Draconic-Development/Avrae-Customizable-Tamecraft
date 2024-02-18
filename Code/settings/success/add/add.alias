@@ -21,7 +21,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab prefix, date, and subalias string
     prefix = ctx.prefix
-    date = "2/17/24"
+    date = "2/18/24"
     subalias_str = f"{prefix}tame settings success add [threshold] [bonus]"
 
     # Set default value
@@ -103,7 +103,7 @@ def main(input_list: list[str]) -> tuple(str, str):
             # Construct output
             f_list = ["**Threshold Above DC: Bonus**\n", "*Added Setting:*", f"**{input_list[0]}:** {input_list[1]}", "\n*Updated Settings:*"] + [f"**{thresh}:** {bonus}" for thresh, bonus in current_values.items()]
 
-            return f"{prefix}embed -title 'Taming Settings: Success Threshold Bonuses' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+            return f"{prefix}embed -title 'Taming Settings: Success Threshold Bonuses' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict).replace(' ', '')}"
 
         # If threshold does exist
         else:
