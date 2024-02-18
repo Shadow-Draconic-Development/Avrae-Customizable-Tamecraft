@@ -24,28 +24,34 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 def main(input_list: list[str]) -> tuple(str, str):
 
+    # Collect prefix, date, server_id, and subalias string
     prefix = ctx.prefix
-    date = "2/11/24"
+    date = "2/18/24"
     server_id = ctx.guild.id
     subalias_str = f"{prefix}tame settings whitelist add [channel id]"
 
-
+    # If SVAR exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # If settings exists
         if "settings" in svar_dict.keys():
 
+            # If whitelisted channel ids exists
             if "whitelisted_channel_ids" in svar_dict["settings"].keys():
                 pass
 
+            # If whitelisted channel ids does not exist
             else:
                 svar_dict["settings"]["whitelisted_channel_ids"] = []
 
+        # If settings does not exist
         else:
             svar_dict["settings"] = {
                 "whitelisted_channel_ids": []
             }
 
+    # If SVAR does not exist
     else:
         svar_dict = {
             "creatures": {},
@@ -54,16 +60,31 @@ def main(input_list: list[str]) -> tuple(str, str):
             }
         }
 
+    # If at least one input was given
     if len(input_list) > 0:
 
+        # Check to see if first input was a number
         try:
-            svar_dict["settings"]["whitelisted_channel_ids"].append(int(input_list[0]))
 
-            return f"{prefix}embed -title 'Whitelisted Channel IDs' -f 'https://discord.com/channels/{server_id}/{svar_dict['settings']['whitelisted_channel_ids'][-1]} added to whitelist' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+            # If channel id not already in list, add to list and sort
+            if not (channel_id := int(input_list[0])) in svar_dict["settings"]["whitelisted_channel_ids"]:
+                svar_dict["settings"]["whitelisted_channel_ids"].append(channel_id)
+                svar_dict["settings"]["whitelisted_channel_ids"].sort()
 
+            # If channel id already in list
+            else:
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Channel ID already exists' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+
+        # If first input was not a number
         except:
             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Channel ID must be a number' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
+        # Construct output
+        f_list = ["**Added Channel:**", f"https://discord.com/channels/{server_id}/{input_list[0]}: {input_list[0]}", "\n**Current Channels:**"] + [f"https://discord.com/channels/{server_id}/{channel}: {channel}" for channel in svar_dict["settings"]["whitelisted_channel_ids"]]
+
+        return f"{prefix}embed -title 'Taming Settings: Whitelisted Channel IDs' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict).replace(' ', '')}"
+
+    # If no inputs were given
     else:
         return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected channel ID' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
