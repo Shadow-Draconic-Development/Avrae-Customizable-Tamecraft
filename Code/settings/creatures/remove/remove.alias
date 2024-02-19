@@ -24,6 +24,10 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 def main(input_list: list[str]) -> tuple(str, str):
 
+    prefix = ctx.prefix
+    subalias_str f"{prefix}tame settings creatures remove [creature name]"
+    date = "2/19/24"
+
     if len(input_list) != 0:
 
         if (svar_test := get_svar("tame_settings")):
@@ -33,7 +37,6 @@ def main(input_list: list[str]) -> tuple(str, str):
             return "You Have Been Sneak Attacked by an Error", "Expected a creature name", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
         if "creatures" in svar_dict.keys():
-
 
             if (search_result := search_list(input_list[0], svar_dict["creatures"])):
 
@@ -59,16 +62,16 @@ def main(input_list: list[str]) -> tuple(str, str):
                     else:
                         search_result.insert(0, "**Multiple Matches Found:**")
 
-                        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures remove [creature name] | {date} | ShadowsStride'", ""
+                        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
             else:
-                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'No matches found {input_list[0]}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures remove [creature name] | {date} | ShadowsStride'", ""
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'No matches found {input_list[0]}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
         else:
-            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no creatures in the taming settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures remove [creature name] | {date} | ShadowsStride'", ""
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no creatures in the taming settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
     else:
-        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a creature name' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures remove [creature name] | {date} | ShadowsStride'", ""
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected a creature name' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
     label_map = {
         "succ": "Successes Required",
@@ -87,7 +90,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     else:
         color = ""
 
-    return f"{prefix}embed -title '{input_list[0]} Has Been Removed' -f '" + "\n".join([f"**{label_map[key]}:** {value}" for key, value in creature_settings.items()]) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures remove [creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+    return f"{prefix}embed -title '{input_list[0]} Has Been Removed' -f '" + "\n".join([f"**{label_map[key]}:** {value}" for key, value in creature_settings.items()]) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
 
 </drac2>

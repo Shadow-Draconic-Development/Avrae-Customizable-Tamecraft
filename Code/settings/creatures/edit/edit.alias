@@ -23,175 +23,207 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def edit_creature(svar_dict: dict, creature_name: str, creature_value: dict, creature_errors: dict, default_settings: dict) -> tuple(dict, dict):
-    
-    # Successes
-    try:
-        creature_value["succ"] = int(creature_value["succ"])
+def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, creature_errors: dict, default_settings: dict) -> tuple(dict, dict):
 
-        if creature_value["succ"] > 0:
-            pass
+    def edit_creature_errors(creature_errors: dict, creature_name:str, error_message: str) -> dict:
 
-        elif creature_value["succ"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
+        if creature_name in creature_errors:
+            creature_errors[creature_name].append(error_message)
 
         else:
-            creature_value["succ"] = 1
+            creature_errors[creature_name] = list(error_message)
 
-    except "KeyError":
-        pass
+        return creature_errors
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
+    creature_settings_copy = creature_settings.copy()
 
-    # Failures
-    try:
-        creature_value["fail"] = int(creature_value["fail"])
+    for setting in creature_settings_copy.keys():
 
-        if creature_value["fail"] > 0:
-            pass
+        match setting:
 
-        elif creature_value["fail"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
+            case "succ":
 
-        else:
-            creature_value["fail"] = 1
+                # Successes
+                try:
+                    creature_settings["succ"] = int(creature_settings["succ"])
 
-    except "KeyError":
-        pass
+                    if creature_settings["succ"] > 0:
+                        pass
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
+                    elif creature_settings["succ"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
 
-    # Cooldown
-    try:
-        creature_value["cooldown"] = int(creature_value["cooldown"])
+                    else:
+                        creature_settings["succ"] = 1
 
-        if creature_value["cooldown"] > 0:
-            pass
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required is a required argument")
 
-        elif creature_value["cooldown"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
 
-        else:
-            creature_value["cooldown"] = 1
+            case "fail":
 
-    except "KeyError":
-        pass
+                # Failures
+                try:
+                    creature_settings["fail"] = int(creature_settings["fail"])
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
+                    if creature_settings["fail"] > 0:
+                        pass
 
-    # DC
-    try:
-        creature_value["dc"] = int(creature_value["dc"])
+                    elif creature_settings["fail"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
 
-        if creature_value["dc"] > 0:
-            pass
+                    else:
+                        creature_settings["fail"] = 1
 
-        elif creature_value["dc"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures is a required argument")
 
-        else:
-            creature_value["dc"] = 1
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
 
-    except "KeyError":
-        pass
+            case "cooldown":
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+                # Cooldown
+                try:
+                    creature_settings["cooldown"] = int(creature_settings["cooldown"])
 
-    # Character Level
-    try:
-        creature_value["lvl"] = int(creature_value["lvl"])
+                    if creature_settings["cooldown"] > 0:
+                        pass
 
-        if creature_value["lvl"] > 1:
+                    elif creature_settings["cooldown"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
 
-            if creature_value["lvl"] <= 20:
+                    else:
+                        creature_settings["cooldown"] = 1
+
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) is a required argument")
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
+
+            case "dc":
+
+                # DC
+                try:
+                    creature_settings["dc"] = int(creature_settings["dc"])
+
+                    if creature_settings["dc"] > 0:
+                        pass
+
+                    elif creature_settings["dc"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+
+                    else:
+                        creature_settings["dc"] = 1
+
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "DC is a required argument")
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+
+            case "lvl":
+
+                # Character Level
+                try:
+                    creature_settings["lvl"] = int(creature_settings["lvl"])
+
+                    if creature_settings["lvl"] > 1:
+
+                        if creature_settings["lvl"] <= 20:
+                            pass
+
+                        else:
+                            creature_settings["lvl"] = 20
+
+                    elif creature_settings["lvl"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number")
+
+                    else:
+                        creature_settings.pop("lvl")
+
+                except "KeyError":
+                    pass
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number") 
+
+            case "cost":
+
+                # Taming Cost
+                try:
+                    creature_settings["cost"] = round(float(creature_settings["cost"]), 2)
+
+                    if creature_settings["cost"] != 0:
+                        pass
+
+                    else:
+                        creature_settings.pop("cost")
+
+                except "KeyError":
+                    pass
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Taming Cost (in GP) must be a number")
+
+            case "xp":
+
+                # Experience Gain
+                try:
+                    creature_settings["xp"] = int(creature_settings["xp"])
+
+                    if creature_settings["xp"] != 0:
+                        pass
+
+                    else:
+                        creature_settings.pop("xp")
+
+                except "KeyError":
+                    pass
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Experience Gain must be a number")
+
+            case "color":
+
+                # Hex Code
+                try:
+                    if (length := len(creature_settings["color"])) == 7:
+                        creature_settings["color"] = creature_settings["color"].upper()
+
+                    elif length == 6:
+                        creature_settings["color"] = "#" + creature_settings["color"].upper()
+
+                    else:
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
+
+                        return svar_dict, creature_errors
+
+                    for letter in creature_settings["color"]:
+                        if letter in ["#", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F"]:
+                            pass
+
+                        else:
+                            creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
+
+                            return svar_dict, creature_errors
+
+                except:
+                    pass
+
+            case _:
                 pass
-
-            else:
-                creature_value["lvl"] = 20
-
-        elif creature_value["lvl"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number")
-
-        else:
-            creature_value.pop("lvl")
-
-    except "KeyError":
-        pass
-
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number") 
-
-    # Taming Cost
-    try:
-        creature_value["cost"] = round(creature_value["lvl"], 2)
-
-        if creature_value["cost"] != 0:
-            pass
-
-        else:
-            creature_value.pop("cost")
-
-    except "KeyError":
-        pass
-
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Taming Cost (in GP) must be a number")
-
-    # Experience Gain
-    try:
-        creature_value["xp"] = int(creature_value["xp"])
-
-        if creature_value["xp"] > 0:
-            pass
-
-        elif creature_value["xp"] < 0:
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Experience Gain must be a non-negative number")
-
-        else:
-            creature_value.pop("xp")
-
-    except "KeyError":
-        pass
-
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Experience Gain must be a non-negative number")
-
-
-    # Hex Code
-    try:
-        if (length := len(creature_value["color"])) == 7:
-            reature_value["color"] = reature_value["color"].upper()
-        elif length == 6:
-            creature_value["color"] = "#" + creature_value["color"].upper()
-
-        else:
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
-
-            return svar_dict, creature_errors
-
-        for letter in creature_value["color"]:
-            if letter in ["#", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F"]:
-                pass
-
-            else:
-                creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
-
-                return svar_dict, creature_errors
-
-    except:
-        pass
 
     if len(creature_errors) == 0:
-        svar_dict[creature_name] = svar_dict[creature_value]
+        svar_dict["creatures"][creature_name] = creature_settings
 
     else:
         pass
@@ -204,7 +236,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     if len(input_list) > 0:
 
-        date = "2/9/24"
+        date = "2/19/24"
         prefix = ctx.prefix
 
         default_settings = {

@@ -31,7 +31,6 @@ def main(input_list: list[str]) -> tuple(str, str):
         date = "2/9/24"
         prefix = ctx.prefix
 
-
         if (svar_test := get_svar("tame_settings")):
             svar_dict = load_json(svar_test)
 
@@ -73,7 +72,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
             else:
                 for match in search_result1:
-                    if match.lower() != input_list[0]:
+                    if match.lower() != input_list[0].lower():
                         pass
 
                     else:
@@ -85,7 +84,7 @@ def main(input_list: list[str]) -> tuple(str, str):
                         else:
                             color = ""
                             
-                        return f"{prefix}embed -title '`{match} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+                        return f"{prefix}embed -title 'Taming Settings: Creature Rename`{match} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
                 search_result1.insert(0, "**Multiple Matches Found:**")
 
@@ -99,7 +98,7 @@ def main(input_list: list[str]) -> tuple(str, str):
             else:
                 found = False
                 for match in search_result1:
-                    if match.lower() != input_list[0]:
+                    if match.lower() != input_list[0].lower():
                         pass
 
                     else:
@@ -119,7 +118,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
             for match in search_result2:
 
-                if match.lower() != input_list[1]:
+                if match.lower() != input_list[1].lower():
                     pass
 
                 else:
@@ -134,7 +133,7 @@ def main(input_list: list[str]) -> tuple(str, str):
                 color = ""
 
 
-            return f"{prefix}embed -title '`{input_list[0]} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+            return f"{prefix}embed -title 'Taming Settings: Creature Rename `{input_list[0]} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
 
 embed_str, svar_str = main(&ARGS&)
