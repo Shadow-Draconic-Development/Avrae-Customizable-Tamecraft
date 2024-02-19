@@ -23,175 +23,207 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def edit_creature(svar_dict: dict, creature_name: str, creature_value: dict, creature_errors: dict, default_settings: dict) -> tuple(dict, dict):
-    
-    # Successes
-    try:
-        creature_value["succ"] = int(creature_value["succ"])
+def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, creature_errors: dict, default_settings: dict) -> tuple(dict, dict):
 
-        if creature_value["succ"] > 0:
-            pass
+    def edit_creature_errors(creature_errors: dict, creature_name:str, error_message: str) -> dict:
 
-        elif creature_value["succ"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
+        if creature_name in creature_errors:
+            creature_errors[creature_name].append(error_message)
 
         else:
-            creature_value["succ"] = 1
+            creature_errors[creature_name] = list(error_message)
 
-    except "KeyError":
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required is a required argument")
+        return creature_errors
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
+    creature_settings_copy = creature_settings.copy()
 
-    # Failures
-    try:
-        creature_value["fail"] = int(creature_value["fail"])
+    for setting in creature_settings_copy.keys():
 
-        if creature_value["fail"] > 0:
-            pass
+        match setting:
 
-        elif creature_value["fail"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
+            case "succ":
 
-        else:
-            creature_value["fail"] = 1
+                # Successes
+                try:
+                    creature_settings["succ"] = int(creature_settings["succ"])
 
-    except "KeyError":
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures is a required argument")
+                    if creature_settings["succ"] > 0:
+                        pass
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
+                    elif creature_settings["succ"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
 
-    # Cooldown
-    try:
-        creature_value["cooldown"] = int(creature_value["cooldown"])
+                    else:
+                        creature_settings["succ"] = 1
 
-        if creature_value["cooldown"] > 0:
-            pass
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required is a required argument")
 
-        elif creature_value["cooldown"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Successes Required must be a non-negative number")
 
-        else:
-            creature_value["cooldown"] = 1
+            case "fail":
 
-    except "KeyError":
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) is a required argument")
+                # Failures
+                try:
+                    creature_settings["fail"] = int(creature_settings["fail"])
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
+                    if creature_settings["fail"] > 0:
+                        pass
 
-    # DC
-    try:
-        creature_value["dc"] = int(creature_value["dc"])
+                    elif creature_settings["fail"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
 
-        if creature_value["dc"] > 0:
-            pass
+                    else:
+                        creature_settings["fail"] = 1
 
-        elif creature_value["dc"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures is a required argument")
 
-        else:
-            creature_value["dc"] = 1
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Maximum Failures must be a non-negative number")
 
-    except "KeyError":
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "DC is a required argument")
+            case "cooldown":
 
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+                # Cooldown
+                try:
+                    creature_settings["cooldown"] = int(creature_settings["cooldown"])
 
-    # Character Level
-    try:
-        creature_value["lvl"] = int(creature_value["lvl"])
+                    if creature_settings["cooldown"] > 0:
+                        pass
 
-        if creature_value["lvl"] > 1:
+                    elif creature_settings["cooldown"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
 
-            if creature_value["lvl"] <= 20:
+                    else:
+                        creature_settings["cooldown"] = 1
+
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) is a required argument")
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Cooldown (in seconds) must be a non-negative number")
+
+            case "dc":
+
+                # DC
+                try:
+                    creature_settings["dc"] = int(creature_settings["dc"])
+
+                    if creature_settings["dc"] > 0:
+                        pass
+
+                    elif creature_settings["dc"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+
+                    else:
+                        creature_settings["dc"] = 1
+
+                except "KeyError":
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "DC is a required argument")
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "DC must be a non-negative number")
+
+            case "lvl":
+
+                # Character Level
+                try:
+                    creature_settings["lvl"] = int(creature_settings["lvl"])
+
+                    if creature_settings["lvl"] > 1:
+
+                        if creature_settings["lvl"] <= 20:
+                            pass
+
+                        else:
+                            creature_settings["lvl"] = 20
+
+                    elif creature_settings["lvl"] < 0:
+                        
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number")
+
+                    else:
+                        creature_settings.pop("lvl")
+
+                except "KeyError":
+                    pass
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number") 
+
+            case "cost":
+
+                # Taming Cost
+                try:
+                    creature_settings["cost"] = round(float(creature_settings["cost"]), 2)
+
+                    if creature_settings["cost"] != 0:
+                        pass
+
+                    else:
+                        creature_settings.pop("cost")
+
+                except "KeyError":
+                    pass
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Taming Cost (in GP) must be a number")
+
+            case "xp":
+
+                # Experience Gain
+                try:
+                    creature_settings["xp"] = int(creature_settings["xp"])
+
+                    if creature_settings["xp"] != 0:
+                        pass
+
+                    else:
+                        creature_settings.pop("xp")
+
+                except "KeyError":
+                    pass
+
+                except:
+                    creature_errors = edit_creature_errors(creature_errors, creature_name, "Experience Gain must be a number")
+
+            case "color":
+
+                # Hex Code
+                try:
+                    if (length := len(creature_settings["color"])) == 7:
+                        creature_settings["color"] = creature_settings["color"].upper()
+
+                    elif length == 6:
+                        creature_settings["color"] = "#" + creature_settings["color"].upper()
+
+                    else:
+                        creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
+
+                        return svar_dict, creature_errors
+
+                    for letter in creature_settings["color"]:
+                        if letter in ["#", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F"]:
+                            pass
+
+                        else:
+                            creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
+
+                            return svar_dict, creature_errors
+
+                except:
+                    pass
+
+            case _:
                 pass
-
-            else:
-                creature_value["lvl"] = 20
-
-        elif creature_value["lvl"] < 0:
-            
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number")
-
-        else:
-            creature_value.pop("lvl")
-
-    except "KeyError":
-        pass
-
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Required Character Level must be a non-negative number") 
-
-    # Taming Cost
-    try:
-        creature_value["cost"] = round(creature_value["lvl"], 2)
-
-        if creature_value["cost"] != 0:
-            pass
-
-        else:
-            creature_value.pop("cost")
-
-    except "KeyError":
-        pass
-
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Taming Cost (in GP) must be a number")
-
-    # Experience Gain
-    try:
-        creature_value["xp"] = int(creature_value["xp"])
-
-        if creature_value["xp"] > 0:
-            pass
-
-        elif creature_value["xp"] < 0:
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Experience Gain must be a non-negative number")
-
-        else:
-            creature_value.pop("xp")
-
-    except "KeyError":
-        pass
-
-    except:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, "Experience Gain must be a non-negative number")
-
-
-    # Hex Code
-    try:
-        if (length := len(creature_value["color"])) == 7:
-            reature_value["color"] = reature_value["color"].upper()
-        elif length == 6:
-            creature_value["color"] = "#" + creature_value["color"].upper()
-
-        else:
-            creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
-
-            return svar_dict, creature_errors
-
-        for letter in creature_value["color"]:
-            if letter in ["#", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F"]:
-                pass
-
-            else:
-                creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
-
-                return svar_dict, creature_errors
-
-    except:
-        pass
 
     if len(creature_errors) == 0:
-        svar_dict[creature_name] = svar_dict[creature_value]
+        svar_dict["creatures"][creature_name] = creature_settings
 
     else:
         pass
@@ -201,10 +233,13 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_value: dict, cre
 
 def main(input_list: list[str]) -> tuple(str, str):
 
+    date = "2/18/24"
+    prefix = ctx.prefix
+    subalias_str = f"{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc]\n"
+
     if len(input_list) > 0:
 
-        date = "2/9/24"
-        prefix = ctx.prefix
+
 
         default_settings = {
             "cost": 0,
@@ -222,8 +257,7 @@ def main(input_list: list[str]) -> tuple(str, str):
             }
 
     else:
-        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected at least creature name, successes, failures, cooldown, and DC' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
-
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected at least creature name, successes, failures, cooldown, and DC' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str}{date} | ShadowsStride'", ""
 
     if input_list[0][0] != "-":
 
@@ -245,14 +279,14 @@ def main(input_list: list[str]) -> tuple(str, str):
             "dc": "DC"
             }
 
+        if not False in changes_dict.values():
+            pass
 
-        for req, req_arg in changes_dict.items():
+        else:
 
-            if req_arg:
-                pass
+            f_list = ["You are missing required argument(s):"] + [label_map[req] for req in changes_dict if changes_dict[req] == False]
 
-            else:
-                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'You are missing a required argument: {label_map[req]}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str}{date} | ShadowsStride'", ""
 
         if not (search_result := search_list(creature_name, svar_dict["creatures"].keys())):
             pass
@@ -264,7 +298,7 @@ def main(input_list: list[str]) -> tuple(str, str):
                     pass
 
                 else:
-                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'That creature already exists' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'That creature already exists' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str}{date} | ShadowsStride'", ""
 
 
         changes_dict.update({
@@ -276,15 +310,15 @@ def main(input_list: list[str]) -> tuple(str, str):
 
         creature_errors = {}
 
-        svar_dict, creature_errors = edit_creature(svar_dict, creature_name, {key:value for key, value in changes_dict.items() if value != False}, default_settings)
+        svar_dict, creature_errors = edit_creature(svar_dict, creature_name, {key:value for key, value in changes_dict.items() if value != False}, creature_errors, default_settings)
 
         if len(creature_errors) == 0:
 
             color_list = []
 
-            for creature_name, creature_value in svar_dict["creatures"].items():
-                if "color" in creature_value.keys():
-                    color_list.append(creature_value["color"])
+            for creature_name, creature_settings in svar_dict["creatures"].items():
+                if "color" in creature_settings.keys():
+                    color_list.append(creature_settings["color"])
 
                 else:
                     pass
@@ -295,15 +329,15 @@ def main(input_list: list[str]) -> tuple(str, str):
             else:
                 color = ""
 
-            return f"{prefix}embed -title 'Adding {creature_name} to the Taming Settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+            return f"{prefix}embed -title 'Adding {creature_name} to the Taming Settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{subalias_str}{date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict).replace(' ', '')}"
 
         else:
             creature_errors[creature_name].insert(0, "**Errors:**")
 
-            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(creature_errors[creature_name]) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(creature_errors[creature_name]) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str}{date} | ShadowsStride'", ""
 
     else:
-        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Creature name must be the first argument and cannot start with -' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc] | {date} | ShadowsStride'", ""
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Creature name must be the first argument and cannot start with -' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str}{date} | ShadowsStride'", ""
 
 
 embed_str, svar_str = main(&ARGS&)
