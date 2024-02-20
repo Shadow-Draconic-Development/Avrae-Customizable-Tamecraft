@@ -1,0 +1,836 @@
+embed
+<drac2>
+
+
+def search_list(query: str, item_list: list[str]) -> list[str]|None:
+    """
+    Searches for item in list.
+
+    Args:
+        query (str): The query being made
+        item_list (list): List of items
+
+    Return:
+        list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
+    """
+
+    # Finds at least 1 match
+    if len(item_results := [item for item in item_list if query.lower() in item.lower()]) > 0:
+        return item_results
+
+    # If it finds no matches
+    else:
+        return None
+
+
+def grab_general_settings(svar_dict: dict) -> dict:
+
+    default_settings = {
+        "lfg_integration": False,
+            "animalHandling",
+            "sleightOfHand",
+            "nature",
+            "survival"
+        ],
+        "pro_rate_refund": True,
+        "jack_of_trades": True,
+        "reliable_talent": False,
+        "success_threshold": {
+            "-999": 1,
+            "5": 2,
+            "10": 3,
+            "15": 4,
+            "20": 5
+        },
+        "nat20": 5,
+        "nat1": -1,
+        "whitelisted_channel_ids": [],
+        "parent_channel_inherit": False
+    }
+
+    if "settings" in svar_dict.keys():
+        settings_dict = {}
+
+        for setting_name in default_settings.keys():
+            if setting_name in svar_dict["settings"].keys():
+                settings_dict[setting_name] = svar_dict["settings"][setting_name]
+
+            else:
+                settings_dict[setting_name] = default_settings[setting_name]
+
+        return settings_dict
+
+    else:
+        return default_settings
+
+
+def hidden_cvar_keys(cvar_dict: dict, action: str) -> dict:
+
+    hidden_data = {
+        "skill": "",
+        "current_bypass": False,
+        "alltime_bypass": False,
+        "first": False,
+        "alterations": {
+            "success_max": None,
+            "failure_max": None,
+            "cost": None
+        },
+        "proficiency": "normal",
+        "advantage": None,
+        "bonus": 0
+    }
+
+    if "current_taming" in cvar_dict.keys():
+        pass
+
+    else:
+        cvar_dict["current_taming"] = {}
+
+    if action == "reveal":
+
+        for setting_name in hidden_data.keys():
+
+            if setting_name in cvar_dict["current_taming"].keys():
+                pass
+
+            else:
+                cvar_dict["current_taming"][setting_name] = hidden_data[setting_name]
+
+    else:
+
+        for setting_name in hidden_data.keys():
+            
+            if cvar_dict["current_taming"][setting_name] == hidden_data[setting_name]:
+                cvar_dict["currnet_taming"].pop(setting_name)
+
+            else:
+                pass
+
+        for key in ["proficiency", "advantage", "bonus"]:
+            try:
+                cvar_dict["current_taming"].pop(key)
+
+            except:
+                pass
+
+
+    return cvar_dict
+
+
+def money_transact(ch: AliasCharacter, amt: float):
+    def coin_parse(amt: float):
+
+        # Get the absolute value of the amount
+        abs_amt = abs(amt)
+
+        # Calculate gold, silver, and copper components
+        gold = int(abs_amt)
+        silver = int((abs_amt * 10) % 10)
+        copper = int((abs_amt * 100) % 10)
+
+        # Apply sign to each component
+        gold *= -1 if amt < 0 else 1
+        silver *= -1 if amt < 0 else 1
+        copper *= -1 if amt < 0 else 1
+
+        return gold, silver, copper
+
+
+    current_coinpurse = ch.coinpurse
+
+    if amt > 0:
+
+        if amt <= (total_amt := current_coinpurse.get_coins()["total"]):
+
+            gold, silver, copper = coin_parse(amt * -1)
+            return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
+
+        else:
+            gold, silver, copper = coin_parse(total_amt - amt)
+
+            output_list = []
+
+            if gold > 0:
+                output_list.append(f"{gold} gold")
+
+            else:
+                pass
+
+            if silver > 0:
+                output_list.append(f"{silver} silver")
+
+            else:
+                pass
+
+            if copper > 0:
+                output_list.append(f"{copper} copper")
+
+            else:
+                pass
+
+            return None, "You Have Been Sneak Attacked by an Error", "You are short " + "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+    if amt < 0:
+
+        gold, silver, copper = coin_parse(amt * -1)
+        return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
+
+    else:
+        return {}, ""
+
+def search_creature(creature_name: str, creature_list: dict_keys):
+
+    if (search_result := search_list(creature_name, creature_list)):
+
+        if len(search_result) == 1:
+            return search_result[0], ""
+
+        else:
+            
+            for match in search_result:
+                if match.lower() != creature_name.lower():
+                    pass
+
+                else:
+                    return match, ""
+
+            search_result.insert(0, "**Multiple Matches Found:**")
+            
+            return None, "\n".join(search_result)
+
+    return None, "Creature not found"
+
+
+def arg_handler(arg_dict: dict, cvar_dict: dict, svar_dict: dict):
+
+
+    for key, value in arg_dict.items():
+
+        match key:
+
+            case "skill":
+
+                skill_list = [
+                    "acrobatics",
+                    "animalHandling",
+                    "arcana",
+                    "athletics",
+                    "deception",
+                    "history",
+                    "insight",
+                    "intimidation",
+                    "investigation",
+                    "medicine",
+                    "nature",
+                    "perception",
+                    "performance",
+                    "persuasion",
+                    "religion",
+                    "sleightOfHand",
+                    "stealth",
+                    "survival",
+                    "strength",
+                    "dexterity",
+                    "constitution",
+                    "intelligence",
+                    "wisdom",
+                    "charisma"
+                ]
+
+                if value == "":
+                    pass
+
+                elif value.lower() = "none":
+                    cvar_dict["current_taming"]["skill"] = ""
+
+                else:
+                    if len(svar_dict["settings"]["skills"]) > 0:
+                        skill_list = svar_dict["settings"]["skills"]
+
+                    else:
+                        pass
+
+                    if (search_result := search_list(value, skill_list)):
+
+                        if len(search_result) == 1:
+                            cvar_dict["current_taming"]["skill"] = search_result[0]
+
+                        else:
+                            cvar_dict["current_taming"]["skill"] = ""
+
+                    else:
+                        cvar_dict["current_taming"]["skill"] = ""
+
+            case "bonus":
+
+                if value == 0:
+                    pass
+
+                else:
+                    cvar_dict["current_taming"]["bonus"] = value
+
+            case "ignore":
+
+                if not value:
+                    cvar_dict["current_taming"]["current_bypass"] = False
+
+                else:
+                    cvar_dict["current_taming"]["current_bypass"] = True
+                    cvar_dict["current_taming"]["alltime_bypass"] = True
+
+            case "expert":
+
+                if value:
+                    cvar_dict["current_taming"]["proficiency"] = "expert"
+
+                else:
+                    pass
+
+            case "prof":
+
+                if value:
+                    if "proficiency" in cvar_dict["current_taming"].keys():
+                        pass
+
+                    else:
+                        cvar_dict["current_taming"]["proficiency"] = "prof"
+
+                else:
+                    pass
+
+            case "fail":
+
+                if value:
+
+                    try:
+                        value = int(value)
+
+                        if value > 0:
+                            pass
+
+                        else value == 0:
+                            value = 1
+
+                        if "alterations" in cvar_dict["current_taming"].keys():
+                            cvar_dict["current_taming"]["alterations"]["failure_max"] = value
+
+                        else:
+                            cvar_dict["current_taming"]["alterations"] = {"failure_max": value}
+
+                    except:
+                        pass
+
+                else:
+                    pass
+
+            case "succ":
+
+                if value:
+
+                    try:
+                        value = int(value)
+
+                        if value > 0:
+                            pass
+
+                        else value == 0:
+                            value = 1
+
+                        if "alterations" in cvar_dict["current_taming"].keys():
+                            cvar_dict["current_taming"]["alterations"]["success_max"] = value
+
+                        else:
+                            cvar_dict["current_taming"]["alterations"] = {"success_max": value}
+
+                    except:
+                        pass
+
+                else:
+                    pass
+
+            case "cost":
+
+                if value:
+
+                    try:
+                        value = round(float(value), 2)
+
+                        if "alterations" in cvar_dict["current_taming"].keys():
+                            cvar_dict["current_taming"]["alterations"]["cost"] = value
+
+                        else:
+                            cvar_dict["current_taming"]["alterations"] = {"cost": value}
+
+                    except:
+                        pass
+
+                else:
+                    pass
+
+            case "adv":
+
+                if value == 0:
+                    cvar_dict["current_taming"]["advantage"] = None
+
+                elif value == 1:        
+                    cvar_dict["current_taming"]["advantage"] = "adv"    
+
+                elif value == 2:
+                    cvar_dict["current_taming"]["advantage"] = "eadv"
+
+                else:
+                    cvar_dict["current_taming"]["advantage"] = "dis"
+
+            case _:
+                pass
+
+            case "bonus":
+
+                value = int(value)
+
+                try:
+                    value = int(value)
+
+                    if value != 0:
+                        cvar_dict["current_taming"]["bonus"]
+
+                    else:
+                        pass
+
+                except:
+                    pass
+
+
+    return hidden_cvar_keys(cvar_dict, "reveal")
+
+
+def grab_creature_settings(alterations: dict, creature_settings: dict):
+
+    for key, value in alterations.items():
+
+        match key:
+            case "success_max":
+
+                if value:
+                    creature_settings["succ"] = value
+
+                else:
+                    pass
+
+            case "failure_max":
+
+                if value:
+                    creature_settings["fail"] = value
+
+                else:
+                    pass
+
+            case "cost":
+
+                if value:
+                    creature_settings["cost"] = value
+
+                else:
+                    pass
+
+    return creature_settings
+
+
+def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings: dict, next_tame: int, current_time: int, bypass: bool, first_tame: bool):
+
+    # Level check
+    if ch.levels.total_level >= creature_settings["lvl"] or bypass:
+        pass
+
+    else:
+        return False, f"Your character must be level {creature_settings["lvl"]} before you can tame this creature", ""
+
+    # Channel check
+    if len(general_settings["whitelisted_channel_ids"]) > 0:
+        
+        if ctx.channel.id in general_settings["whitelisted_channel_ids"]:
+            pass
+
+        else:
+            if ctx.channel.parent.id in general_settings["whitelisted_channel_ids"] and general_settings["parent_channel_inherit"]:
+                pass
+
+            else:
+                return False, "You cannot tame in this channel/thread, speak to a staff member for additional details"
+
+    else:
+        pass
+
+    # Cooldown check
+    if next_tame <= current_time or bypass:
+        pass
+
+    else:
+        return False, f"You may not run a taming session until <t:{next_tame}:f>", ""
+
+    if not first_tame:
+        return True, {}
+
+    else:
+
+        if not bypass and creature_settings["cost"] != 0:
+            delta_dict, message = money_transact(ch, creature_settings["cost"])
+
+            if delta_dict:
+                return True, delta_dict
+
+            else:
+                return delta_dict, message
+
+        else:
+            return True, {}
+
+
+def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
+
+    cvar_dict["history"].insert(0, cvar_dict["current_taming"]["creature_name"])
+    
+    ch.create_cc(
+        name="Taming: Successes",
+        minVal="0",
+        maxVal=str(creature_settings["fail"]),
+        reset=None,
+        dispType="bubble",
+        title=f"Taming Failures: {cvar_dict["history"][-1]}",
+        desc=f"Taming failures for {cvar_dict["history"][-1]}",
+        initial_value="0"
+    )
+
+    ch.create_cc(
+        name="Taming: Failures",
+        minVal="0",
+        maxVal=str(creature_settings["succ"]),
+        reset=None,
+        dispType="star",
+        title=f"Taming Successes: {cvar_dict["history"][-1]}",
+        desc=f"Taming successes for {cvar_dict["history"][-1]}",
+        initial_value="0"
+    )
+
+    return cvar_dict
+
+
+def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_settings: dict):
+
+
+
+    ability_skills = {
+        "strength": ["athletics", "strength"],
+        "dexterity": ["acrobatics", "sleightOfHand", "stealth", "dexterity"],
+        "constitution": ["constitution"],
+        "intelligence": ["arcana", "history", "investigation", "nature", "religion", "intelligence"],
+        "wisdom": ["animalHandling", "insight", "medicine", "perception", "survival", "wisdom"],
+        "charisma": ["deception", "intimidation", "performance", "persuasion", "charisma"]
+    }
+
+    if len(general_settings["skills"]) > 0:
+
+        skill_dict = {
+            "strength": [],
+            "dexterity": [],
+            "constitution": [],
+            "intelligence": [],
+            "wisdom": [],
+            "charisma": []
+        }
+
+        for skill in general_settings["skills"]:
+
+            for ability, skill_list in ability_skills.items:
+
+                if skill in skill_list:
+                    skill_dict[ability].append(skill)
+
+                else:
+                    pass
+
+        temp_dict = skill_dict.copy()
+
+        for ability, skill_list in temp_dict.items():
+            if skill_list == []:
+                skill_dict.pop(abilty)
+            
+            else:
+                pass
+
+    else:
+        skill_dict = ability_skills.copy()
+
+    skill_objects = {}
+
+    for skill_name, skillobj in ch.skills:
+
+        for ability, skill_list in skill_dict.items():
+
+            if skill_name in skill_list:
+
+                if ability in skill_objects.keys():
+                    pass
+
+                else:
+                    skill_objects[ability] = {}
+
+                skill_objects[ability].update({skill_name: skill_obj})
+                break
+
+            else:
+                pass
+
+    highest_stat, highest_value, highest_skillobj = None, -999, None
+
+    character_abilty_mods = {
+        "strength": strengthMod,
+        "dexterity": dexterityMod,
+        "constitution": constitutionMod,
+        "intelligence": intelligenceMod,
+        "wisdom": wisdomMod,
+        "charisma": charismaMod
+    }
+
+    skill_values = {}
+
+    for ability, skill_dict in skill_objects.items():
+        for skill, skillobj in skill_dict.items():
+
+            if (prof_type := skill_obj.prof) == 2 or proficiency_type == "expert":
+                prof_bonus = proficiencyBonus * 2
+
+            elif prof_type == 1 or proficiency_type == "prof":
+                prof_bonus = proficiencyBonus
+
+            elif prof_type == .5 and general_settings["jack_of_trades"]:
+                prof_bonus = floor(proficiencyBonus * .5)
+
+            else:
+                prof_bonus = 0
+
+            if (skill_value := skillobj.bonus + character_abilty_mods[ability] + prof_bonus) > highest_value:
+                highest_stat, highest_value, highest_skillobj = skill, skill_value, skillobj 
+
+            else:
+                pass
+
+    return highest_stat, highest_value, highest_skillobj
+
+
+
+
+def run_taming_session(ch: AliasCharacter, creature_settings, general_settings, cvar_dict):
+
+    warning_list = []
+
+    if cvar_dict["current_taming"]["skill"] == "":
+        skill_name, skill_bonus, skill_object = find_optimal_stat(ch, cvar_dict["current_taming"]["proficiency"], general_settings)
+
+    else:
+
+        skill_name, skill_bonus, skill_object = None, -999, None
+
+        character_abilty_mods = {
+            "strength": strengthMod,
+            "dexterity": dexterityMod,
+            "constitution": constitutionMod,
+            "intelligence": intelligenceMod,
+            "wisdom": wisdomMod,
+            "charisma": charismaMod
+        }
+
+        for skill, skill_obj in ch.skills:
+
+            if skill != cvar_dict["current_taming"]["skill"]:
+                pass
+
+            else:
+
+                if (prof_type := skill_obj.prof) == 2 or proficiency_type == "expert":
+                    prof_bonus = proficiencyBonus * 2
+
+                elif prof_type == 1 or proficiency_type == "prof":
+                    prof_bonus = proficiencyBonus
+
+                elif prof_type == .5 and general_settings["jack_of_trades"]:
+                    prof_bonus = floor(proficiencyBonus * .5)
+
+                else:
+                    prof_bonus = 0
+
+                skill_name, skill_bonus, skill_object = cvar_dict["current_taming"]["skill"], skill_obj.bonus + character_abilty_mods[ability] + prof_bonus, skill_obj
+
+                break
+
+    ############################################################################################################################
+    # Need to construct dice strings and roll dice (don't forget user inputted bonus)
+
+
+def main(input_list: list[str]):
+
+
+    # If SVAR exists, load dictionary and grab settings
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+        
+    # If SVAR does not exist
+    else:
+        return "You Have Been Sneak Attacked by an Error", "Taming settings SVAR does not exist", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+    # Character object
+    ch = character()
+    
+    # If character is selected
+    if ch:
+        current_time = int(time())
+
+    # If character is not selected
+    else:
+        return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+    # If there is more than one input
+    if len(input_list) > 0:
+
+        # If crafting is in progress
+        if ch.cc_exists("Taming: Successes") and ch.cc_exists("Taming: Failures"):
+
+            # If CVAR exists
+            if (cvar_test := ch.get_cvar("tame_dict")):
+                cvar_dict = load_json(cvar_test)
+
+            # If CVAR does not exist
+            else:
+                return "You Have Been Sneak Attacked by an Error", "CVAR data has been deleted, please delete CCs", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+            # Fills in missing values and updates values
+            cvar_dict = arg_handler(
+                {
+                "skill": args.last("s", default=cvar_dict["skill"]),
+                "bonus": args.last("b", default=0),
+                "ignore": args.last("i", default=False),
+                "prof": args.last("prof", default=False),
+                "expert": args.last("expert", default=False),
+                "adv": args.adv(eadv=True) 
+                },
+                cvar_dict,
+                svar_dict
+            )
+
+            # If creature is still in settings
+            if (creature_name := cvar_dict["current_taming"]["creature_name"]) in svar_dict["creatures"].keys():
+
+                # Load settings
+                creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
+                general_settings = grab_general_settings(svar_dict)
+
+            else:
+                return "You Have Been Sneak Attacked by an Error", "This creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+            valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], False)
+
+            if valid:
+                delta_money_dict = output.copy()
+
+            else:
+                return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+        # If taming is not in progress
+        else:
+
+            # If CVAR exists
+            if (cvar_test := ch.get_cvar("tame_dict")):
+                cvar_dict = load_json(cvar_test)
+
+            # If CVAR does not exist
+            else:
+                cvar_dict = {
+                    "history": [],
+                    "current_taming": {},
+                    "next_tame": 0
+                }
+
+            creature_name, output = search_creature(input_list[0], svar_dict["creatures"].keys())
+             
+            if creature_name:
+                cvar_dict["current_taming"]["creature_name"] = creature_name
+
+            else:
+                return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+            cvar_dict = arg_handler(
+                {
+                    "skill": args.last("s", default=""),
+                    "bonus": args.last("b", default=0),
+                    "ignore": args.last("i", default=False),
+                    "prof": args.last("prof", default=False),
+                    "expert": args.last("expert", default=False),
+                    "succ": args.last("succ", default=None),
+                    "fail": args.last("fail", default=None),
+                    "cost": args.last("cost", default=None),
+                    "adv": args.adv(eadv=True)
+                },
+                cvar_dict,
+                svar_dict
+            )
+
+            # Load settings
+            creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
+            general_settings = grab_general_settings(svar_dict)
+
+            valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], True)
+
+            if valid:
+                delta_money_dict = output.copy()
+
+            else:
+                return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+            cvar_dict = setup_taming(ch, creature_settings, cvar_dict)
+
+    # If no inputs were given
+    else:
+
+        # If taming is in progress
+        if ch.cc_exists("Taming: Successes") and ch.cc_exists("Taming: Failures"):
+
+            # If CVAR exists
+            if (cvar_test := ch.get_cvar("tame_dict")):
+                cvar_dict = load_json(cvar_test)
+
+            # If CVAR does not exist
+            else:
+                return "You Have Been Sneak Attacked by an Error", "CVAR data has been deleted, please delete CCs", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+        else:
+            return "You Have Been Sneak Attacked by an Error", "No taming is currently in process", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+        cvar_dict = arg_handler({}, cvar_dict, svar_dict)
+
+        # If creature is still in settings
+        if (creature_name := cvar_dict["current_taming"]["creature_name"]) in svar_dict["creatures"].keys():
+
+            # Load settings
+            creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
+            general_settings = grab_general_settings(svar_dict)
+
+        else:
+            return "You Have Been Sneak Attacked by an Error", "This creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+        valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], False)
+
+        if valid:
+            delta_money_dict = output.copy()
+
+        else:
+            return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+    # Taming session requires ch, cvar_dict, creature_settings, general_settings
+
+
+
+title, thumb, color = main(&ARGS&)
+
+
+</drac2>
