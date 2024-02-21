@@ -518,8 +518,6 @@ def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
 
 def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_settings: dict):
 
-
-
     ability_skills = {
         "strength": ["athletics", "strength"],
         "dexterity": ["acrobatics", "sleightOfHand", "stealth", "dexterity"],
@@ -619,9 +617,7 @@ def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_setting
     return highest_stat, highest_value, highest_skillobj
 
 
-
-
-def run_taming_session(ch: AliasCharacter, creature_settings, general_settings, cvar_dict):
+def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_settings: dict, cvar_dict: dict, current_time: int) -> tuple(int, int, str, str, dict):
 
     warning_list = []
 
@@ -648,6 +644,7 @@ def run_taming_session(ch: AliasCharacter, creature_settings, general_settings, 
 
             else:
 
+                # Need to change proficiency_type to actual dictionary entry
                 if (prof_type := skill_obj.prof) == 2 or proficiency_type == "expert":
                     prof_bonus = proficiencyBonus * 2
 
@@ -664,8 +661,95 @@ def run_taming_session(ch: AliasCharacter, creature_settings, general_settings, 
 
                 break
 
-    ############################################################################################################################
-    # Need to construct dice strings and roll dice (don't forget user inputted bonus)
+    if not cvar_dict["current_taming"]["advantage"]:
+        dice_str = "1d20"
+
+    elif cvar_dict["current_taming"]["advantage"] == "adv":
+        dice_str = "2d20kh1"
+
+    elif cvar_dict["current_taming"]["advantage"] == "eadv":
+        dice_str = "3d10kh1"
+
+    else:
+        dice_str = "2d20kl1"
+
+    if "halfling" in ch.race.lower():
+        dice_str += "ro1"
+
+    else:
+        pass
+
+    if ch.levels.get("Rogue") >= 11 and general_settings["reliable_talent"]:
+        dice_str += "mi10"
+
+    else:
+        pass
+
+    if cvar_dict["current_taming"]["bonus"] != 0:
+
+        try:
+            vroll(cvar_dict["current_taming"]["bonus"])
+            bonus_str = f"{skill_bonus} + {cvar_dict['current_taming']['bonus']}"
+
+        except:
+            bonus_str = f"{skill_bonus}"
+
+    else:
+        bonus_str = f"{skill_bonus}"
+
+    dice_obj = vroll(dice_str)
+    bonus_obj = vroll(bonus_str)
+
+    success_cc = ch.cc("Taming: Successes")
+    failure_cc = ch.cc("Taming: Failures")
+
+    if dice_obj.total == 1 or dice_obj.total == 20:
+
+        if dice_obj.total == 1:
+            success_mod = general_settings["nat1"]
+            failure_mod = 1
+
+        else:
+            success_mod = general_settings["nat20"]
+            failure_mod = 0
+
+    else:
+        success_mod = 0
+        failure_mod = 0
+
+    total_roll = dice_obj.total + bonus_obj.total
+
+    if (over_thresh := total_roll - creature_settings["dc"]) >= 0:
+
+        bonus_amt = 0
+        for threshold, bonus in general_settings["success_threshold"].items():
+            if over_thresh >= int(threshold):
+                bonus_amt = bonus
+
+            else:
+                break
+
+        success_mod += bonus_amt
+
+        if success_mod > (max_succ := max(general_settings["success_threshold"].values())):
+            success_mod = max_succ
+
+        else:
+            pass
+
+    else:
+        failure_mod = 1
+
+    dice_str = f"{dice_obj.dice} + {bonus_obj.dice} = `{total_roll}`"
+
+    ch.mod_cc("Taming: Successes", success_mod)
+    ch.mod_cc("Taming: Failures", failure_mod)
+
+    cvar_dict["next_tame"] = current_time
+
+
+
+    return success_mod, failure_mod, dice_str, skill_name, cvar_dict
 
 
 def main(input_list: list[str]):
@@ -826,8 +910,20 @@ def main(input_list: list[str]):
         else:
             return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
-    # Taming session requires ch, cvar_dict, creature_settings, general_settings
 
+    success_cc_value = ch.cc("Taming: Successes").value
+    failure_cc_value = ch.cc("Taming: Failures").value
+
+    success_mod, failure_mod, dice_str, skill_name, cvar_dict = run_taming_session(ch, creature_settings, general_settings, cvar_dict, current_time)
+
+    cvar_dict = hidden_cvar_keys(cvar_dict, "hide")
+
+    success_cc = ch.cc("Taming: Successes")
+    failure_cc = ch.cc("Taming: Failures")
+
+    ################################################################################################################################
+    # Format output
+    # Update CVAR
 
 
 title, thumb, color = main(&ARGS&)
