@@ -434,6 +434,19 @@ def grab_creature_settings(alterations: dict, creature_settings: dict):
                 else:
                     pass
 
+    if not "color" in creature_settings.keys():
+        creature_settings["color"] = ""
+
+    else:
+        pass
+
+    for setting in ["lvl", "cost", "xp"]:
+        if setting not in creature_settings.keys():
+            creature_settings[setting] = 0
+
+        else:
+            pass
+
     return creature_settings
 
 
@@ -652,7 +665,7 @@ def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_setting
     return highest_stat, highest_value, highest_skillobj
 
 
-def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_settings: dict, cvar_dict: dict, current_time: int) -> tuple(int, int, str, str, dict):
+def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_settings: dict, cvar_dict: dict, current_time: int) -> tuple(int, int, str, str, dict, bool):
 
     if cvar_dict["current_taming"]["skill"] == "":
         skill_name, skill_bonus, skill_object = find_optimal_stat(ch, cvar_dict["current_taming"]["proficiency"], general_settings)
@@ -751,6 +764,7 @@ def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_sett
 
     if (over_thresh := total_roll - creature_settings["dc"]) >= 0:
 
+        success = True
         bonus_amt = 0
         for threshold, bonus in general_settings["success_threshold"].items():
             if over_thresh >= int(threshold):
@@ -768,6 +782,7 @@ def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_sett
             pass
 
     else:
+        success = False
         failure_mod = 1
 
     dice_str = f"{dice_obj.dice} + {bonus_obj.dice} = `{total_roll}`"
@@ -777,7 +792,7 @@ def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_sett
 
     cvar_dict["next_tame"] = current_time
 
-    return success_mod, failure_mod, dice_str, skill_name, cvar_dict
+    return success_mod, failure_mod, dice_str, skill_name, cvar_dict, success
 
 
 def main(input_list: list[str]):
@@ -939,11 +954,10 @@ def main(input_list: list[str]):
         else:
             return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
-    previous_succ_val = ch.cc("Taming: Successes").value
-
-    success_mod, failure_mod, dice_str, skill_name, cvar_dict = run_taming_session(ch, creature_settings, general_settings, cvar_dict, current_time)
+    success_mod, failure_mod, dice_str, skill_name, cvar_dict, success_bool = run_taming_session(ch, creature_settings, general_settings, cvar_dict, current_time)
 
     cvar_dict = hidden_cvar_keys(cvar_dict, "hide")
+    ch.set_cvar("tame_dict", dump_json(cvar_dict).replace(" ", ""))
 
     success_cc = ch.cc("Taming: Successes")
     failure_cc = ch.cc("Taming: Failures")
@@ -953,20 +967,90 @@ def main(input_list: list[str]):
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/fail.png"
 
     elif success_cc.value == failure_cc.max:
-        outcome = True
+        added_str = f"`You have succeeded your taming, please run {prefix}tame clear` to clear your progress"
+        img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/success.png"
 
     else:
-        outome = None
+        added_str = ""
+        img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+
+    if "current_bypass" in cvar_dict["current_taming"].keys():
+        if not cvar_dict["current_taming"]["current_bypass"]:
+
+            if added_str == "":
+                added_str = "`BYPASS USED`"
+
+            else:
+                added_str += "\n`BYPASS USED`"
+
+        else:
+            pass
+
+    else:
+        pass
+
+    if success_bool:
+        result_list = ["**Success**"]
+
+    else:
+        result_list = ["**Failure**"]
+
+    result_list.append(f"Skill Used: {skill_name}")
+
+    result_list.append(f"DC: {creature_settings["dc"]}\n")
+
+    result_list.append(f"{dice_str}\n")
+
+    if sucess_mod > 0:
+        succ_add = f" (+{success_mod})"
+
+    elif success_mod < 0:
+        succ_add = f" ({success_mod})"
+
+    else:
+        succ_add = ""
+
+    succ_str = f"{success_cc.value}/{success_cc.max}"
+
+    result_list.append(f"Successes: {succ_str}{succ_add}")
+
+    if succ_str == (cc_str := ch.cc_str("Taming: Successes")):
+        result_list.append("")
+
+    else:
+        result_list.append(f"{cc_str}\n")
+
+    if failure_mod > 0:
+        fail_add = f" (+{failure_mod})"
+
+    elif failure_mod == 0:
+        fail_add = ""
+
+    else:
+       fail_add = f" ({failure_mod})"
+
+    fail_str = f"{failure_cc.value}/{failure_cc.max}"
+
+    result_list.append(f"Failures: {fail_str}{fail_add}")
+
+    if fail_str == (cc_str := ch.cc_str("Taming: Failures")):
+        result_list.append("")
+
+    else:
+        result_list.append(f"{cc_str}\n")
+
+    result_list.append(added_str)
+
+    return f"{name}'s Taming Session: {cvar_dict['current_taming']['creature_name']}", "\n".join(result_list), img_url, creature_settings["color"]
 
 
-    
-
-    ################################################################################################################################
-    # Format output
-    # Update CVAR
-
-
-title, thumb, color = main(&ARGS&)
+title, f, thumb, color = main(&ARGS&)
+l = "<"
 
 
 </drac2>
+-title "{{title}}"
+-f "{{f}}"
+-thumb "{{thumb}}"
+-color "{{color}}"
+-footer "{{ctx.prefix}}tame {{l}}creature name> | 2/21/24 | ShadowsStride"
