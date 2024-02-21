@@ -462,6 +462,23 @@ def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings
     else:
         pass
 
+    # Completed taming
+    if ch.cc_exists("Taming: Successes") and ch.cc_exists("Taming: Failures"):
+
+        success_cc, failure_cc = ch.cc("Taming: Successes"), ch.cc("Taming: Failures")
+
+        if failure_cc.value == failure_cc.max:
+            return False, "You have failed taming, please run `!tame clear` to clear your taming progress."
+
+        elif success_cc.value == success_cc.max:
+            return False, "You have succeeded taming, please run `!tame clear` to clear your taming progress."
+
+        else:
+            pass
+
+    else:
+        pass
+
     # Cooldown check
     if next_tame <= current_time or bypass:
         pass
@@ -909,10 +926,6 @@ def main(input_list: list[str]):
 
         else:
             return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
-
-
-    success_cc_value = ch.cc("Taming: Successes").value
-    failure_cc_value = ch.cc("Taming: Failures").value
 
     success_mod, failure_mod, dice_str, skill_name, cvar_dict = run_taming_session(ch, creature_settings, general_settings, cvar_dict, current_time)
 
