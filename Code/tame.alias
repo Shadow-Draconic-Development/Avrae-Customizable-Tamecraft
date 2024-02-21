@@ -467,11 +467,29 @@ def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings
 
         success_cc, failure_cc = ch.cc("Taming: Successes"), ch.cc("Taming: Failures")
 
-        if failure_cc.value == failure_cc.max:
-            return False, "You have failed taming, please run `!tame clear` to clear your taming progress."
+        if success_cc.max != creature_settings["succ"]:
+            success_cc = ch.edit_cc(
+                "Taming: Successes",
+                maxVal=str(creature_settings["succ"])
+            )
 
-        elif success_cc.value == success_cc.max:
-            return False, "You have succeeded taming, please run `!tame clear` to clear your taming progress."
+        else:
+            pass
+
+        if failure_cc.max != failure_settings["fail"]:
+            failure_cc = ch.edit_cc(
+                "Taming: Failures",
+                maxVal=str(creature_settings["fail"])
+            )
+
+        else:
+            pass
+
+        if failure_cc.value >= failure_cc.max:
+            return False, f"You have failed taming, please run `{ctx.prefix}tame clear` to clear your taming progress."
+
+        elif success_cc.value >= success_cc.max:
+            return False, f"You have succeeded taming, please run `{ctx.prefix}tame clear` to clear your taming progress."
 
         else:
             pass
@@ -636,8 +654,6 @@ def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_setting
 
 def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_settings: dict, cvar_dict: dict, current_time: int) -> tuple(int, int, str, str, dict):
 
-    warning_list = []
-
     if cvar_dict["current_taming"]["skill"] == "":
         skill_name, skill_bonus, skill_object = find_optimal_stat(ch, cvar_dict["current_taming"]["proficiency"], general_settings)
 
@@ -717,9 +733,6 @@ def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_sett
     dice_obj = vroll(dice_str)
     bonus_obj = vroll(bonus_str)
 
-    success_cc = ch.cc("Taming: Successes")
-    failure_cc = ch.cc("Taming: Failures")
-
     if dice_obj.total == 1 or dice_obj.total == 20:
 
         if dice_obj.total == 1:
@@ -764,8 +777,6 @@ def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_sett
 
     cvar_dict["next_tame"] = current_time
 
-
-
     return success_mod, failure_mod, dice_str, skill_name, cvar_dict
 
 
@@ -780,8 +791,9 @@ def main(input_list: list[str]):
     else:
         return "You Have Been Sneak Attacked by an Error", "Taming settings SVAR does not exist", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
-    # Character object
+    # Character object and server prefix
     ch = character()
+    prefix = ctx.prefix
     
     # If character is selected
     if ch:
@@ -927,12 +939,27 @@ def main(input_list: list[str]):
         else:
             return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+    previous_succ_val = ch.cc("Taming: Successes").value
+
     success_mod, failure_mod, dice_str, skill_name, cvar_dict = run_taming_session(ch, creature_settings, general_settings, cvar_dict, current_time)
 
     cvar_dict = hidden_cvar_keys(cvar_dict, "hide")
 
     success_cc = ch.cc("Taming: Successes")
     failure_cc = ch.cc("Taming: Failures")
+
+    if failure_cc.value == failure_cc.max:
+        added_str = f"`You have failed your taming, please run {prefix}tame clear` to clear your progress"
+        img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/fail.png"
+
+    elif success_cc.value == failure_cc.max:
+        outcome = True
+
+    else:
+        outome = None
+
+
+    
 
     ################################################################################################################################
     # Format output
