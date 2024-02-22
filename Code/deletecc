@@ -1,0 +1,3 @@
+multiline
+!cc delete "succ"
+!cc delete "fail"
