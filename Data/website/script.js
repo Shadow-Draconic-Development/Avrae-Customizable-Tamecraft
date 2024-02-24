@@ -298,6 +298,9 @@ function toggleDarkMode() {
     });
 
     localStorage.setItem("darkMode", isDarkMode ? "enabled" : "disabled");
+
+    // Call the function to update scrollbar colors
+    updateScrollbarColors(isDarkMode);
 }
 
 const prefersDarkMode =
@@ -316,6 +319,21 @@ function updateScrollbarColors(isDarkMode) {
     document.documentElement.style.setProperty(
         "--scrollbar-bg-color",
         scrollbarBgColor
+    );
+
+    document.documentElement.style.setProperty(
+        "--scrollbar-thumb-color",
+        scrollbarThumbColor
+    );
+
+    document.documentElement.style.setProperty(
+        "--scrollbar-thumb-hover-color",
+        scrollbarThumbHoverColor
+    );
+
+    document.documentElement.style.setProperty(
+        "--scrollbar-track-color",
+        scrollbarTrackColor
     );
 }
 
@@ -474,3 +492,10 @@ function getDefaultValues() {
         color: "",
     };
 }
+
+window.onload = function() {
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    if (isFirefox) {
+        alert('This website does not properly support CSS formatting for Firefox, be aware of poor formatting');
+    }
+};
