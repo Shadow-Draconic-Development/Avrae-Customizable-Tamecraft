@@ -26,7 +26,20 @@ body {
     margin-top: 20px;
     display: flex;
     justify-content: center;
+    margin-right: 0;
+    padding-right: 0;
+    align-items: center;
 }
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-height: 0%;
+    padding-right: 0;
+    align-items: center;
+    }
 
 button {
     padding: 12px 24px; /* Adjusted padding for better touch interaction */
@@ -90,10 +103,9 @@ input[type="text"] {
     background-color: #c82333;
 }
 
-/* Custom scrollbar styles */
+/* For WebKit-based browsers (Chrome, Safari) */
 ::-webkit-scrollbar {
-    width: 10px;
-    background-color: var(--scrollbar-bg-color);
+    width: 10px; /* Set width to your desired size */
 }
 
 ::-webkit-scrollbar-thumb {
@@ -103,11 +115,32 @@ input[type="text"] {
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--scrollbar-thumb-hover-color);
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background-color: var(--scrollbar-track-color);
+    border-radius: 5px;
 }
+
+/* For Edge */
+::-ms-scrollbar {
+    width: 5px; /* Set width to your desired size */
+}
+
+::-ms-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-color);
+    border-radius: 5px;
+}
+
+::-ms-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover-color);
+}
+
+::-ms-scrollbar-track {
+    background-color: var(--scrollbar-bg-color);
+}
+
+
 
 .required {
     color: red;
