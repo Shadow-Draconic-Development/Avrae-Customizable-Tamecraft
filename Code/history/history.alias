@@ -1,0 +1,114 @@
+embed
+<drac2>
+
+
+def compile_output(page_num: int, history_list: list[str]) -> str:
+
+    output_list = [["**History:**"], []]
+    i = 1
+    found = False
+
+    for item in history_list:
+
+        if not found:
+            if len("\n".join(output_list[i]) + f"\n{item}") <= 250:
+                output_list[i].append(item)
+
+            else:
+                i += 1
+                output_list.append([item])
+
+                try:
+                    output_list[page_num]
+                    found = True
+
+                except:
+                    pass
+
+        else:
+            if len("\n".join(output_list[i]) + f"\n{item}") <= 250:
+                output_list[i].append(item)
+
+            else:
+                return output_list[0] + output_list[i]
+
+    return output_list[0] + output_list[-1]
+
+
+def main(input_list: list[str]) -> tuple(str, str, str, str):
+
+    ch = character()
+
+    if ch:
+        if (cvar_test := ch.get_cvar("tame_dict")):
+            cvar_dict = load_json(cvar_test)
+
+        else:
+            return f"{name}'s Taming History", "None (CVAR does not exist)", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
+
+    else:
+        return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+    if "history" in cvar_dict.keys():
+
+        if len(cvar_dict["history"]) > 0:
+
+            if len(input_list) > 0:
+
+                try:
+                    output_list = compile_output(int(input_list), cvar_dict["history"])
+
+                except:
+                    output_list = compile_output(1, cvar_dict["history"])
+
+        else:
+            return f"{name}'s Taming History", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
+
+    else:
+        return f"{name}'s Taming History", "None (No history key in CVAR)", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
+    
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        if "creatures" in svar_dict.keys():
+
+            color_creature_list = output_list[1:]
+
+            color_list = []
+            for creature in color_creature_list:
+                if creature in svar_dict["creatures"].keys():
+
+                    if "color" in svar_dict["creatures"][creature]:
+                        color_creature_list.append(svar_dict["creatures"][creature]["color"])
+
+                    else:
+                        pass
+
+                else:
+                    pass
+
+            if len(color_list) > 0:
+                color = randchoice(color_list)
+
+            else:
+                color = ""
+
+        else:
+            color = ""
+
+    else:
+        color = ""
+
+    return f"{name}'s Taming history", "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
+
+
+title, f, thumb, color = main(&ARGS&)
+l = "<"
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-thumb "{{thumb}}"
+-color "{{color}}"
+-footer "{{ctx.prefix}}tame history {{l}}#> | 2/25/24 | ShadowsStride"
