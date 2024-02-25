@@ -1,0 +1,48 @@
+embed
+<drac2>
+
+def main() -> tuple(str, str, str, str):
+
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        if "creatures" in cvar_dict.keys():
+            
+            if len(cvar_dict["creatures"]) > 0:
+
+                color_list = []
+
+                for creature in cvar_dict["creatures"].keys():
+                    if "color" in cvar_dict["creatures"][creature].keys():
+                        color_list.append(cvar_dict["creatures"][creature]["color"])
+
+                    else:
+                        pass
+
+                if len(color_list) > 0:
+                    color = randchoice(color_list)
+
+                else:
+                    color = ""
+
+                return "Current Tamable Creatures", "\n".join(cvar_dict["creatures"].keys()), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
+
+            else:
+                return "Current Tamable Creatures", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
+
+        else:
+            return "Current Tamable Creatures", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
+
+    else:
+        return "Current Tamable Creatures", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
+
+
+title, f, thumb, color = main()
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-thumb "{{thumb}}"
+-color "{{color}}"
+-footer "{{ctx.prefix}}tame list | 2/25/24 | ShadowsStride"

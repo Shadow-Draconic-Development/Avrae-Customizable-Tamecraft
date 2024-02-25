@@ -546,7 +546,11 @@ def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings
 
 def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
 
-    cvar_dict["history"].insert(0, cvar_dict["current_taming"]["creature_name"])
+    if "history" in cvar_dict.key():
+        cvar_dict["history"].insert(0, cvar_dict["current_taming"]["creature_name"])
+
+    else:
+        cvar_dict["history"] = [cvar_dict["current_taming"]["creature_name"]]
     
     ch.create_cc(
         name="Taming: Successes",
