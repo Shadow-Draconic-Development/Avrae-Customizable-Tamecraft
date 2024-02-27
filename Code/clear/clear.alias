@@ -163,7 +163,7 @@ def main():
 
         cvar_dict["current_taming"] = {}
 
-    elif success_cc.value = success_cc.max:
+    elif success_cc.value == success_cc.max:
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/success.png"
         title = f"{name}'s Taming ({cvar_dict['current_taming']['creature_name']}): Success"
 
@@ -237,24 +237,28 @@ def main():
                 color = ""
 
                 if general_settings["pro_rate_refund"]:
-                    output_list("Unable to provide pro-rated refund (if any) due to settings missing in SVAR")
+                    output_list.append("Unable to provide pro-rated refund (if any) due to settings missing in SVAR")
 
                 else:
                     pass
 
                 cost = 0
+
+                cvar_dict["current_taming"] = {}
         
         else:
             color = ""
             if general_settings["pro_rate_refund"]:
-                output_list("Unable to provide pro-rated refund (if any) due to settings missing in SVAR")
+                output_list.append("Unable to provide pro-rated refund (if any) due to settings missing in SVAR")
 
             else:
                 pass
 
-            cost = 0    
+            cost = 0
 
-        if cost != 0 and general_settings["pro_rate_refund"]:
+            cvar_dict["current_taming"] = {}   
+
+        if general_settings["pro_rate_refund"]:
             percent_back = ((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5
 
             if (money_back := round(percent_back * cost, 2)) > 0:
@@ -266,60 +270,63 @@ def main():
         else:
             money_back = 0
 
-        cvar_dict["backup"] = cvar_dict.pop("current_taming")
+        if cvar_dict["current_taming"] != {}:
+            cvar_dict["backup"] = cvar_dict.pop("current_taming")
 
-        cvar_dict["backup"]["success_cc"] = {
-            "value": success_cc.value,
-            "max": success_cc.max
-        }
-
-        cvar_dict["backup"]["failure_cc"] = {
-            "value": failure_cc.value,
-            "max": failure_cc.max
-        }
-
-        if money_back != 0:
-            cvar_dict["money_back"] = money_back
-
-
-            delta_money_dict, output = money_transact(ch, money_back * -1)
-
-            if delta_money_dict:
-                pass
-
-            else:
-                return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
-
-
-            delta_money_float = delta_money_dict.pop("total")
-
-            if delta_money_float % 1 == 0:
-                delta_money_float = int(delta_money_float)
-
-            else:
-                pass
-
-            coin_emoji_mapping = {
-                "cp": "<:DDBCopper:953399505129205830>",
-                "sp": "<:DDBSilver:953399505124995122>",
-                "ep": "<:DDBElectrum:953399505129205831>",
-                "gp": "<:DDBGold:953399505062080594>",
-                "pp": "<:DDBPlatinum:953399504739106847>"
+            cvar_dict["backup"]["success_cc"] = {
+                "value": success_cc.value,
+                "max": success_cc.max
             }
 
-            money_dict = ch.coinpurse.get_coins()
-
-            money_str_list = [
-                f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({currency_value})"
-                if currency_value != 0
-                else f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]}"
-                for currency_shorthand, currency_value in delta_money_dict.items()
-            ]
-
-            output_list.append("\n".join(money_str_list))
+            cvar_dict["backup"]["failure_cc"] = {
+                "value": failure_cc.value,
+                "max": failure_cc.max
+            }
 
         else:
-            pass
+
+            if money_back != 0:
+                cvar_dict["money_back"] = money_back
+
+
+                delta_money_dict, output = money_transact(ch, money_back * -1)
+
+                if delta_money_dict:
+                    pass
+
+                else:
+                    return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+
+                delta_money_float = delta_money_dict.pop("total")
+
+                if delta_money_float % 1 == 0:
+                    delta_money_float = int(delta_money_float)
+
+                else:
+                    pass
+
+                coin_emoji_mapping = {
+                    "cp": "<:DDBCopper:953399505129205830>",
+                    "sp": "<:DDBSilver:953399505124995122>",
+                    "ep": "<:DDBElectrum:953399505129205831>",
+                    "gp": "<:DDBGold:953399505062080594>",
+                    "pp": "<:DDBPlatinum:953399504739106847>"
+                }
+
+                money_dict = ch.coinpurse.get_coins()
+
+                money_str_list = [
+                    f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({currency_value})"
+                    if currency_value != 0
+                    else f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]}"
+                    for currency_shorthand, currency_value in delta_money_dict.items()
+                ]
+
+                output_list.append("\n".join(money_str_list))
+
+            else:
+                pass
 
         
     ch.delete_cc("Taming: Successes")

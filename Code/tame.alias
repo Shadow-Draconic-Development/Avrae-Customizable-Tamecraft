@@ -170,7 +170,7 @@ def money_transact(ch: AliasCharacter, amt: float):
             else:
                 pass
 
-            return None, "You Have Been Sneak Attacked by an Error", "You are short " + "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+            return None, "You are short " + "\n".join(output_list)
 
     if amt < 0:
 
@@ -558,8 +558,8 @@ def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
         maxVal=str(creature_settings["succ"]),
         reset=None,
         dispType="star",
-        title=f"Taming Failures: {cvar_dict['history'][-1]}",
-        desc=f"Taming failures for {cvar_dict['history'][-1]}",
+        title=f"Taming successes: {cvar_dict['history'][-1]}",
+        desc=f"Taming successes for {cvar_dict['history'][-1]}",
         initial_value="0"
     )
 
@@ -569,8 +569,8 @@ def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
         maxVal=str(creature_settings["fail"]),
         reset=None,
         dispType="bubble",
-        title=f"Taming Successes: {cvar_dict['history'][-1]}",
-        desc=f"Taming successes for {cvar_dict['history'][-1]}",
+        title=f"Taming Failures: {cvar_dict['history'][-1]}",
+        desc=f"Taming failures for {cvar_dict['history'][-1]}",
         initial_value="0"
     )
 
