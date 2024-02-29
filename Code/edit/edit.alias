@@ -24,132 +24,192 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 
 def main(input_list: list[str]) -> tuple(str, str, str, str):
+    """
+    Main program function
+    
+    Return:
+        str: Title
+        str: Body content
+        str: Image URL
+        str: Color hex code
+    """
 
+    # If more than one input
     if len(input_list) > 1:
 
+        # Character object
         ch = character()
 
+        # If character selected
         if ch:
 
+            # If SVAR exists, load dictionary
+            if (svar_test := get_svar("tame_settings")):
+                svar_dict = load_json(svar_test)
+                svar_exists = True
+
+                # If settings in SVAR
+                if "settings" in svar_dict.keys():
+
+                    # If whitelisted channel IDs in SVAR
+                    if "whitelisted_channel_ids" in svar_dict["settings"].keys():
+
+                        # If one or more channel IDs
+                        if len(general_settings["whitelisted_channel_ids"]) > 0:
+                            
+                            # If channel ID not in whitelist
+                            if ctx.channel.id not in general_settings["whitelisted_channel_ids"]:
+
+                                # If parent channel inherit not in settings
+                                if not "parent_channel_inherit" in general_settings.keys():
+                                    general_settings["parent_channel_inherit"] = False
+
+                                # If parent channel ID in whitelist or no parent channel inherit
+                                if ctx.channel.parent.id not in general_settings["whitelisted_channel_ids"] or not general_settings["parent_channel_inherit"]:
+                                    return False, "You cannot tame in this channel/thread, speak to a staff member for additional details"
+
+            # If SVAR does not exist
+            else:
+                svar_exists = False
+
+            # If taming CCs exist
             if ch.cc_exists("Taming: Successes") and ch.cc_exists("Taming: Failures"):
 
-                if (search_result := search_list(input_list[0], ["Successes", "Failures"]))
+                # If valid first input
+                if (search_result := search_list(input_list[0], ["Successes", "Failures"])):
 
+                    # If input indicating successes, set counter string
                     if search_result[0] == "Successes":
                         counter = "Taming: Successes"
 
+                        # Try to set second input as a number
                         try:
                             input_list[1] = success_mod = int(input_list[1])
                             failure_mod = 0
                             title_str = "Successes"
 
+                        # Invalid second input
                         except:
                             return "You Have Been Sneak Attacked by an Error", "Invalid counter change inputted", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+                    # If input indicating failures, set counter string
                     else:
                         counter = "Taming: Failures"
 
+                        # Try to set second input as a number
                         try:
                             input_list[1] = failure_mod = int(input_list[1])
                             success_mod = 0
                             title_str = "Failures"
 
+                        # Invalid second input
                         except:
                             return "You Have Been Sneak Attacked by an Error", "Invalid counter change inputted", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+                # Invalid first input
                 else:
                     "You Have Been Sneak Attacked by an Error", "Invalid counter name inputted", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+            # Taming session not active
             else:
                 return "You Have Been Sneak Attacked by an Error", "You must have an on going taming session (or one of your counters has been corrupted)", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+        # If character not selected
         else:
             return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+    # If less than two inputs
     else:
         return "You Have Been Sneak Attacked by an Error", "Expected the counter and counter change", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+    # Create result list
     result_list = []
 
+    # Modify proper counter
     ch.mod_cc(
         counter,
         input_list[1]
         )
 
+    # Collect CCs
+    success_cc = ch.cc("Taming: Successes")
+    failure_cc = ch.cc("Taming: Failures")
+
+    # If success mod positive
     if success_mod > 0:
         succ_add = f" (+{success_mod})"
 
+    # If success mod negative
     elif success_mod < 0:
         succ_add = f" ({success_mod})"
 
+    # If success mod zero
     else:
         succ_add = ""
 
+    # Success string
     succ_str = f"{success_cc.value}/{success_cc.max}"
-
     result_list.append(f"Successes: {succ_str}{succ_add}")
 
+    # If success string is equal
     if succ_str == (cc_str := ch.cc_str("Taming: Successes")):
         result_list.append("")
 
+    # If success string is not equal
     else:
         result_list.append(f"{cc_str}\n")
 
+    # If failure mod positive
     if failure_mod > 0:
         fail_add = f" (+{failure_mod})"
 
+    # If failure mod negative
     elif failure_mod == 0:
         fail_add = ""
 
+    # If failure mod zero
     else:
        fail_add = f" ({failure_mod})"
 
+    # Failure string
     fail_str = f"{failure_cc.value}/{failure_cc.max}"
-
     result_list.append(f"Failures: {fail_str}{fail_add}")
 
+    # If failure stirng is equal
     if fail_str == (cc_str := ch.cc_str("Taming: Failures")):
         result_list.append("")
 
+    # If failure string is not equal
     else:
         result_list.append(f"{cc_str}\n")
 
-    if (svar_test := get_svar("tame_settings")):
-        svar_dict = load_json(svar_test)
+    # Set color default
+    color = ""
 
+    # If SVAR exists
+    if svar_exists:
+
+        # If creatures in SVAR and CVAR exists, load CVAR dictionary
         if "creatures" in svar_dict.keys() and (cvar_test := ch.get_cvar("tame_dict")):
             cvar_dict = load_json(svar_test)
 
+            # If current taiming in CVAR
             if "current_taming" in cvar_dict.keys():
 
+                # If creature name in CVAR
                 if "creature_name" in cvar_dict["current_taming"]:
 
+                    # If creature in SVAR
                     if cvar_dict["current_taming"]["creature_name"] in cvar_dict["creatures"].keys():
 
+                        # If color in SVAR
                         if "color" in cvar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                             color = cvar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
-
-                        else:
-                            color = ""
-
-                    else:
-                        color = ""
-
-                else:
-                    color = ""
-
-            else:
-                color = ""
-
-        else:
-            color = ""
-
-    else:
-        color = ""
 
     return f"{name} Alters their {title_str}", "\n".join(result_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
 
+# Main program function
 title, f, thumb, color = main(&ARGS&)
 
 
@@ -158,4 +218,4 @@ title, f, thumb, color = main(&ARGS&)
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame edit [success/failure] [#] | 2/25/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame edit [success/failure] [#] | 2/28/24 | ShadowsStride"
