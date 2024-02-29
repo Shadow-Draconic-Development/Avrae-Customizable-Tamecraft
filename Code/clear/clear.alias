@@ -2,52 +2,31 @@ embed
 <drac2>
 
 
-def grab_general_settings(svar_dict: dict) -> dict:
+def money_transact(ch: AliasCharacter, amt: float) -> tuple(dict|None, str):
+    """
+    Handles transactions in and out of characters coin purse
 
-    default_settings = {
-        "lfg_integration": False,
-        "skill":[
-            "animalHandling",
-            "sleightOfHand",
-            "nature",
-            "survival"
-        ],
-        "pro_rate_refund": True,
-        "jack_of_trades": True,
-        "reliable_talent": False,
-        "success_threshold": {
-            "-999": 1,
-            "5": 2,
-            "10": 3,
-            "15": 4,
-            "20": 5
-        },
-        "nat20": 5,
-        "nat1": -1,
-        "whitelisted_channel_ids": [],
-        "parent_channel_inherit": False
-    }
+    Args:
+        ch (AliasCharacter): Character object
+        amt (float): Money to remove/add (If positive, remove. If negative, add)
+    
+    Return:
+        dict|None: Delta change dictionary, None if error
+        str: Message
+    """
 
-    if "settings" in svar_dict.keys():
-        settings_dict = {}
+    def coin_parse(amt: float) -> tuple(int, int, int):
+        """
+        Parses out coin amount into gold, silver, and copper
+        
+        Args:
+            amt (float): Amount to be parsed
 
-        for setting_name in default_settings.keys():
-            if setting_name in svar_dict["settings"].keys():
-                settings_dict[setting_name] = svar_dict["settings"][setting_name]
-
-            else:
-                settings_dict[setting_name] = default_settings[setting_name]
-
-        return settings_dict
-
-    else:
-        svar_dict = {}
-
-        return default_settings
-
-
-def money_transact(ch: AliasCharacter, amt: float):
-    def coin_parse(amt: float):
+        Return:
+            int: Gold amount
+            int: Silver amount
+            int: Copper amount
+        """
 
         # Get the absolute value of the amount
         abs_amt = abs(amt)
@@ -64,116 +43,156 @@ def money_transact(ch: AliasCharacter, amt: float):
 
         return gold, silver, copper
 
-
+    # Get current coin purse
     current_coinpurse = ch.coinpurse
 
+    # If amount is positive (subtracting from purse)
     if amt > 0:
 
+        # If amount is less than character money amount
         if amt <= (total_amt := current_coinpurse.get_coins()["total"]):
 
+            # Parse out amounts (negative)
             gold, silver, copper = coin_parse(amt * -1)
+
             return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
 
+        # If amount is greater than character money amount
         else:
-            gold, silver, copper = coin_parse(total_amt - amt)
+
+            # Parse out difference
+            gold, silver, copper = coin_parse(abs(total_amt - amt))
 
             output_list = []
 
+            # If more than 0 gold
             if gold > 0:
                 output_list.append(f"{gold} gold")
 
-            else:
-                pass
-
+            # If more than 0 silver
             if silver > 0:
                 output_list.append(f"{silver} silver")
 
-            else:
-                pass
-
+            # If more than 0 copper
             if copper > 0:
                 output_list.append(f"{copper} copper")
 
-            else:
-                pass
 
-            return None, "You Have Been Sneak Attacked by an Error", "You are short " + "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+            return None, "You are short " + "\n".join(output_list)
 
-    if amt < 0:
+    elif amt < 0:
 
         gold, silver, copper = coin_parse(amt * -1)
+
         return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
 
     else:
-        return {}, ""
+        return {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}, ""
 
 
-def main():
+def main() -> tuple(str, str, str, str):
+    """
+    Main program function
+    
+    Return:
+        str: Title
+        str: Body content
+        str: Image URL
+        str: Color hex code
+    """
 
+    # Character object
     ch = character()
 
+    # If character selected
     if (ch):
+
+        # If CVAR exists, load dictionary
         if (cvar_test := ch.get_cvar("tame_dict")):
             cvar_dict = load_json(cvar_test)
 
+        # If CVAR does not exist
         else:
             return "You Have Been Sneak Attacked by an Error", "You do not have an existing CVAR", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+    # If character not selected
     else:
         return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
-    
+    # If SVAR exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # Load general settings
         general_settings = grab_general_settings(svar_dict)
 
+    # If SVAR does not exist
     else:
         return "You Have Been Sneak Attacked by an Error", "Taming settings SVAR does not exist", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
-    
+    # If taming CCs exist, load them
     if ch.cc_exists("Taming: Successes") and ch.cc_exists("Taming: Failures"):
+        success_cc, failure_cc = ch.cc("Taming: Successes"), ch.cc("Taming: Failures")
 
-        success_cc, failure_cc = ch.cc("Taming: Successes"), ch.cc("Taming Failures")
-
+    # If taming CCs do not exist
     else:
        return "You Have Been Sneak Attacked by an Error", "There is no taming session to clear", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
-
+    # Create output list
     output_list = []
 
-
+    # If failed taming
     if failure_cc.value == failure_cc.max:
+
+        # Set image URL and title
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/fail.png"
         title = f"{name}'s Taming ({cvar_dict['current_taming']['creature_name']}): Failure"
 
+        # If creatures in SVAR
         if "creatures" in svar_dict.keys():
+
+            # If creature in SVAR
             if cvar_dict["current_taming"]["creature_name"] in svar_dict["creatures"].keys():
+
+                # If color in creatures
                 if "color" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                     color = svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
 
+                # If color not in creatures
                 else:
                     color = ""
 
+            # If creature not in SVAR
             else:
                 color = ""
 
+        # If creatures not in SVAR
         else:
             color = ""
 
+        # Clear current taming
         cvar_dict["current_taming"] = {}
 
+    # If successful taming
     elif success_cc.value == success_cc.max:
+
+        # Set image URL and title
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/success.png"
         title = f"{name}'s Taming ({cvar_dict['current_taming']['creature_name']}): Success"
 
+        # If creatures in SVAR
         if "creatures" in svar_dict.keys():
+
+            # If creature in SVAR
             if cvar_dict["current_taming"]["creature_name"] in svar_dict["creatures"].keys():
 
+                # If XP in SVAR
                 if "xp" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
 
+                    # Load library
                     using(logtools="11743454-0aca-46a6-ad73-9b902a65fbeb")
 
+                    # Modify XP
                     logtools.modify_xp(
                         value=svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["xp"],
                         log_message="From Taming",
@@ -182,165 +201,208 @@ def main():
 
                     output_list.append(f"{svar_dict['creatures'][cvar_dict['current_taming']['creature_name']]['xp']}xp added")
 
-                else:
-                    output_list("Unable to provide xp (if any) due to settings missing in SVAR")
-
+                # If color in SVAR
                 if "color" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                     color = svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
 
+                # If color not in SVAR
                 else:
                     color = ""
 
+            # If creature not in SVAR
             else:
                 color = ""
                 output_list("Unable to provide xp (if any) due to settings missing in SVAR")
 
+        # If creatures not in SVAR
         else:
             color = ""
             output_list("Unable to provide xp (if any) due to settings missing in SVAR")
 
+        # Clear current taming
         cvar_dict["current_taming"] = {}
 
-
+    # If incomplete taming
     else:
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
         title = f"{name}'s Taming ({cvar_dict['current_taming']['creature_name']}): Incompletion"
         
-        if "creatures" in svar_dict.keys()
+        # Set default value
+        if not "pro_rate_refund" in general_settings.keys():
+            general_settings["pro_rate_refund"] = True
+
+        # If creatures in SVAR
+        if "creatures" in svar_dict.keys():
+
+            # If creature in SVAR
             if cvar_dict["current_taming"]["creature_name"] in svar_dict["creatures"].keys():
 
+                # If alterations in CVAR
                 if "alterations" in cvar_dict["current_taming"].keys():
-                    if "cost" in cvar_dict["current_taming"]["alterations"].keys():
 
+                    # If cost in CVAR
+                    if "cost" in cvar_dict["current_taming"]["alterations"].keys():
                         cost = cvar_dict["current_taming"]["alterations"]["cost"]
 
+                    # If cost not in CVAR
                     else:
+
+                        # If cost in SVAR
                         if "cost" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                             cost = svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["cost"]
 
+                        # If cost not in SVAR
                         else:
                             cost = 0
 
+                # If cost in SVAR
                 elif "cost" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                     cost = svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["cost"]
 
+                # If cost not in SVAR
                 else:
                     cost = 0
 
+                # If color in SVAR
                 if "color" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                     color = svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
 
+                # If color not in SVAR
                 else:
                     color = ""
                 
+            # If creature not in SVAR
             else:
                 color = ""
 
+                # If prorated refund
                 if general_settings["pro_rate_refund"]:
                     output_list.append("Unable to provide pro-rated refund (if any) due to settings missing in SVAR")
 
-                else:
-                    pass
-
+                # Set cost to 0
                 cost = 0
 
+                # Clear current taming
                 cvar_dict["current_taming"] = {}
         
+        # If creatures not in SVAR
         else:
             color = ""
+
+            # If prorated refund
             if general_settings["pro_rate_refund"]:
                 output_list.append("Unable to provide pro-rated refund (if any) due to settings missing in SVAR")
 
-            else:
-                pass
-
+            # Set cost to 0
             cost = 0
 
+            # Clear current taming
             cvar_dict["current_taming"] = {}   
 
+        # If prorated refund, calculate percent back
         if general_settings["pro_rate_refund"]:
-            percent_back = ((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5
+            percent_back = 1 - (((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5)
 
-            if (money_back := round(percent_back * cost, 2)) > 0:
-                pass
-
+            # If percent back is positive
+            if percent_back > 0:
+                money_back = round(percent_back * cost, 2)
+ 
+            # If percent back is not positive
             else:
                 money_back = 0
 
+        # If not money back
         else:
             money_back = 0
 
-        if cvar_dict["current_taming"] != {}:
-            cvar_dict["backup"] = cvar_dict.pop("current_taming")
+        # Store backup from current taming
+        cvar_dict["backup"] = cvar_dict.pop("current_taming")
 
-            cvar_dict["backup"]["success_cc"] = {
-                "value": success_cc.value,
-                "max": success_cc.max
+        # Store success CC values
+        cvar_dict["backup"]["success_cc"] = {
+            "value": success_cc.value,
+            "max": success_cc.max
+        }
+
+        # Store failure cc values
+        cvar_dict["backup"]["failure_cc"] = {
+            "value": failure_cc.value,
+            "max": failure_cc.max
+        }
+
+        # If money back is not 0
+        if money_back != 0:
+
+            # Store money_back amount
+            cvar_dict["backup"]["money_back"] = money_back
+
+            # Take money back
+            delta_money_dict, output = money_transact(ch, money_back * -1)
+
+            # If error
+            if not delta_money_dict:
+                return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+            # Pull total money taken out
+            delta_money_float = delta_money_dict.pop("total")
+
+            # If whole number
+            if delta_money_float % 1 == 0:
+                delta_money_float = int(delta_money_float)
+
+            # Emoji mapping
+            coin_emoji_mapping = {
+                "cp": "<:DDBCopper:953399505129205830>",
+                "sp": "<:DDBSilver:953399505124995122>",
+                "ep": "<:DDBElectrum:953399505129205831>",
+                "gp": "<:DDBGold:953399505062080594>",
+                "pp": "<:DDBPlatinum:953399504739106847>"
             }
 
-            cvar_dict["backup"]["failure_cc"] = {
-                "value": failure_cc.value,
-                "max": failure_cc.max
-            }
+            # Get new current money amount
+            money_dict = ch.coinpurse.get_coins()
 
-        else:
+            # If money total a whole number
+            if (money_total := round(money_dict["total"], 2)) % 1 == 0:
+                money_total = int(money_total)
 
-            if money_back != 0:
-                cvar_dict["money_back"] = money_back
+            # If money given
+            if delta_money_float > 0:
+                sign = "+"
 
-
-                delta_money_dict, output = money_transact(ch, money_back * -1)
-
-                if delta_money_dict:
-                    pass
-
-                else:
-                    return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
-
-
-                delta_money_float = delta_money_dict.pop("total")
-
-                if delta_money_float % 1 == 0:
-                    delta_money_float = int(delta_money_float)
-
-                else:
-                    pass
-
-                coin_emoji_mapping = {
-                    "cp": "<:DDBCopper:953399505129205830>",
-                    "sp": "<:DDBSilver:953399505124995122>",
-                    "ep": "<:DDBElectrum:953399505129205831>",
-                    "gp": "<:DDBGold:953399505062080594>",
-                    "pp": "<:DDBPlatinum:953399504739106847>"
-                }
-
-                money_dict = ch.coinpurse.get_coins()
-
-                money_str_list = [
-                    f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({currency_value})"
-                    if currency_value != 0
-                    else f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]}"
-                    for currency_shorthand, currency_value in delta_money_dict.items()
-                ]
-
-                output_list.append("\n".join(money_str_list))
-
+            # If money taken
             else:
-                pass
+                sign = ""
 
-        
+            # Compile currency values (and changes)
+            money_str_list = [
+                f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({sign}{currency_value})"
+                if currency_value != 0
+                else f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]}"
+                for currency_shorthand, currency_value in delta_money_dict.items()
+            ]
+
+            # Add currency values and total
+            output_list.append("\n".join(money_str_list))
+            output_list.append(f"\n Total: {money_total}{coin_emoji_mapping['gp']}")
+
+    # Delete CCs        
     ch.delete_cc("Taming: Successes")
     ch.delete_cc("Taming: Failures")
 
+    # Store CVAR
     ch.set_cvar("tame_dict", dump_json(cvar_dict).replace(" ", ""))
 
     return title, "\n".join(["Taming progress cleared", ""] + output_list), img_url, color
 
+
+# Main program function
 title, f, thumb, color = main()
 
 
 </drac2>
 -title "{{title}}"
+-f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.alias}}tame clear | 2/24/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame clear | 2/28/24 | ShadowsStride"
