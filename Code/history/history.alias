@@ -2,132 +2,175 @@ embed
 <drac2>
 
 
-def compile_output(page_num: int, history_list: list[str]) -> str:
+def compile_output(page_num: int, history_list: list[str]) -> tuple(list[str], int):
+    """
+    Compiles list of creatures from history list
 
+    Args:
+        page_num (int): Page number
+        history_list (list[str]): List of creatures from history
+
+    Return:
+        list[str]: List of creature names
+        int: Page number
+    """
+
+    # Prepare container
     output_list = [["**History:**"], []]
     i = 1
     found = False
+    char_limit = 350
 
+    # For each item in history list
     for item in history_list:
 
+        # If not found
         if not found:
-            if len("\n".join(output_list[i]) + f"\n{item}") <= 250:
+
+            # If length of current list is less than limit
+            if len("\n".join(output_list[i]) + f"\n{item}") <= char_limit:
                 output_list[i].append(item)
 
+            # If length of current list is greater than limit
             else:
                 i += 1
                 output_list.append([item])
 
+                # Check to see page_num is found
                 try:
                     output_list[page_num]
                     found = True
 
+                # Page number is not found
                 except:
                     pass
 
+        # If found
         else:
-            if len("\n".join(output_list[i]) + f"\n{item}") <= 250:
+
+            # If length of current list is less than limit
+            if len("\n".join(output_list[i]) + f"\n{item}") <= char_limit:
                 output_list[i].append(item)
 
+            # If length of current list is greater than limit
             else:
-                return output_list[0] + output_list[i]
+                return output_list[0] + output_list[i], i
 
-    return output_list[0] + output_list[-1]
+    return output_list[0] + output_list[-1], i
 
 
 def main(input_list: list[str]) -> tuple(str, str, str, str):
+    """
+    Main program function
 
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Title
+        str: Body content
+        str: Image URL
+        str: Hex color code
+    """
+
+    # Character object
     ch = character()
 
+    # If character selected
     if ch:
+
+        # If CVAR exists, load dictionary
         if (cvar_test := ch.get_cvar("tame_dict")):
             cvar_dict = load_json(cvar_test)
 
+        # If CVAR does not exist
         else:
             return f"{name}'s Taming History", "None (CVAR does not exist)", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 
+    # If character not selected
     else:
         return "You Have Been Sneak Attacked by an Error", "You must have a character selected", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+    # If history in keys
     if "history" in cvar_dict.keys():
 
+        # If length of history greater than zero
         if len(cvar_dict["history"]) > 0:
 
+            # If input is greater than 0
             if len(input_list) > 0:
 
+                # Try to convert input to integer
                 try:
-                    output_list = compile_output(int(input_list), cvar_dict["history"])
+                    output_list, page_num = compile_output(int(input_list), cvar_dict["history"])
 
+                # Failed conversion to integer
                 except:
-                    output_list = compile_output(1, cvar_dict["history"])
+                    output_list, page_num = compile_output(1, cvar_dict["history"])
 
+            # No inputs
             else:
-                output_list = compile_output(1, cvar_dict["history"])
+                output_list, page_num = compile_output(1, cvar_dict["history"])
 
+        # If length of history is zero
         else:
             return f"{name}'s Taming History", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 
+    # If history is not in keys
     else:
         return f"{name}'s Taming History", "None (No history key in CVAR)", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
     
+    # Set default color
+    color = ""
+
+    # If SVAR exists, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
+        # If creatures in SVAR
         if "creatures" in svar_dict.keys():
 
+            # Get creature list
             color_creature_list = output_list[1:]
 
+            # Color list
             color_list = []
+
+            # For each creature in color creature list
             for creature in color_creature_list:
+
+                # If creature in SVAR
                 if creature in svar_dict["creatures"].keys():
 
+                    # If color in SVAR
                     if "color" in svar_dict["creatures"][creature]:
                         color_creature_list.append(svar_dict["creatures"][creature]["color"])
 
-                    else:
-                        pass
-
-                else:
-                    pass
-
+            # If color list longer than one
             if len(color_list) > 0:
                 color = randchoice(color_list)
 
-            else:
-                color = ""
-
-        else:
-            color = ""
-
-    else:
-        color = ""
-
+    # Construct output string
     output_str = "\n".join(output_list)
 
-    if "current_taming" in cvar_dict.keys():
-        if "creature_name" in cvar_dict["current_taming"].keys():
+    # If current taming exists in CVAR and page number is 1
+    if "current_taming" in cvar_dict.keys() and page_num == 1:
 
+        # If creature name in CVAR add snippet to most recent match
+        if "creature_name" in cvar_dict["current_taming"].keys():
             output_str = output_str.replace(f"{cvar_dict['current_taming']['creature_name']}\n", f"{cvar_dict['current_taming']['creature_name']} <-- (Current Taming)\n", 1)
 
-        else:
-            pass
-
-    else:
-        pass
-
+    # If current taming exists in CVAR
     if "backup" in cvar_dict.keys():
+
+        # If creature name in CVAR add snippet to most recent match
         if "creature_name" in cvar_dict["backup"].keys():
             output_str = output_str.replace(f"{cvar_dict['backup']['creature_name']}\n", f"{cvar_dict['backup']['creature_name']} <-- (In backup)\n", 1)
-
-        else:
-            pass
-
-    else:
-        pass
 
     return f"{name}'s Taming history", output_str, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
 
+# Main program function
 title, f, thumb, color = main(&ARGS&)
 l = "<"
 
@@ -137,4 +180,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame history {{l}}#> | 2/28/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame history {{l}}#> | 2/29/24 | ShadowsStride"
