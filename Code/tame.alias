@@ -24,7 +24,17 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 
 def grab_general_settings(svar_dict: dict) -> dict:
+    """
+    Grabs general settings from SVAR
 
+    Args:
+        svar_dict (dict): Dictionary from SVAR
+
+    Return:
+        dict: General settings
+    """
+
+    # Defintes default settings
     default_settings = {
         "lfg_integration": False,
         "skill":[
@@ -49,24 +59,42 @@ def grab_general_settings(svar_dict: dict) -> dict:
         "parent_channel_inherit": False
     }
 
+    # If settings in SVAR, create dictionary
     if "settings" in svar_dict.keys():
         settings_dict = {}
 
+        # For each setting in default_settings
         for setting_name in default_settings.keys():
+
+            # If setting exists in SVAR, use SVAR setting
             if setting_name in svar_dict["settings"].keys():
                 settings_dict[setting_name] = svar_dict["settings"][setting_name]
 
+            # If setting does not exist in SVAR, use default setting
             else:
                 settings_dict[setting_name] = default_settings[setting_name]
 
+        # Return settings
         return settings_dict
 
+    # If settings not in SVAR, return default settings
     else:
         return default_settings
 
 
 def hidden_cvar_keys(cvar_dict: dict, action: str) -> dict:
+    """
+    Hides/shows empty CVAR creature settings
+    
+    Args:
+        cvar_dict (dict): CVAR dictionary
+        action (str): Action to take
 
+    Return:
+        dict: Updated CVAR dictionary
+    """
+
+    # Default settings
     hidden_data = {
         "skill": "",
         "current_bypass": False,
@@ -82,32 +110,31 @@ def hidden_cvar_keys(cvar_dict: dict, action: str) -> dict:
         "bonus": 0
     }
 
-    if "current_taming" in cvar_dict.keys():
-        pass
-
-    else:
+    # If current taming does not exist
+    if not "current_taming" in cvar_dict.keys():
         cvar_dict["current_taming"] = {}
 
+    # If reveal keys
     if action == "reveal":
 
+        # For each setting
         for setting_name in hidden_data.keys():
 
-            if setting_name in cvar_dict["current_taming"].keys():
-                pass
-
-            else:
+            # If setting does not exist
+            if not setting_name in cvar_dict["current_taming"].keys():
                 cvar_dict["current_taming"][setting_name] = hidden_data[setting_name]
 
+    # If hide keys
     else:
 
+        # For each setting
         for setting_name in hidden_data.keys():
             
+            # If setting is default, remove key
             if cvar_dict["current_taming"][setting_name] == hidden_data[setting_name]:
                 cvar_dict["current_taming"].pop(setting_name)
 
-            else:
-                pass
-
+        # For each key, try to remove temporary item 
         for key in ["proficiency", "advantage", "bonus"]:
             try:
                 cvar_dict["current_taming"].pop(key)
@@ -115,12 +142,34 @@ def hidden_cvar_keys(cvar_dict: dict, action: str) -> dict:
             except:
                 pass
 
-
     return cvar_dict
 
 
-def money_transact(ch: AliasCharacter, amt: float):
-    def coin_parse(amt: float):
+def money_transact(ch: AliasCharacter, amt: float) -> tuple(dict|None, str):
+    """
+    Handles transactions in and out of characters coin purse
+
+    Args:
+        ch (AliasCharacter): Character object
+        amt (float): Money to remove/add (If positive, remove. If negative, add)
+    
+    Return:
+        dict|None: Delta change dictionary, None if error
+        str: Message
+    """
+
+    def coin_parse(amt: float) -> tuple(int, int, int):
+        """
+        Parses out coin amount into gold, silver, and copper
+        
+        Args:
+            amt (float): Amount to be parsed
+
+        Return:
+            int: Gold amount
+            int: Silver amount
+            int: Copper amount
+        """
 
         # Get the absolute value of the amount
         abs_amt = abs(amt)
@@ -137,63 +186,80 @@ def money_transact(ch: AliasCharacter, amt: float):
 
         return gold, silver, copper
 
-
+    # Get current coin purse
     current_coinpurse = ch.coinpurse
 
+    # If amount is positive (subtracting from purse)
     if amt > 0:
 
+        # If amount is less than character money amount
         if amt <= (total_amt := current_coinpurse.get_coins()["total"]):
 
+            # Parse out amounts (negative)
             gold, silver, copper = coin_parse(amt * -1)
+
             return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
 
+        # If amount is greater than character money amount
         else:
-            gold, silver, copper = coin_parse(total_amt - amt)
+
+            # Parse out difference
+            gold, silver, copper = coin_parse(abs(total_amt - amt))
 
             output_list = []
 
+            # If more than 0 gold
             if gold > 0:
                 output_list.append(f"{gold} gold")
 
-            else:
-                pass
-
+            # If more than 0 silver
             if silver > 0:
                 output_list.append(f"{silver} silver")
 
-            else:
-                pass
-
+            # If more than 0 copper
             if copper > 0:
                 output_list.append(f"{copper} copper")
 
-            else:
-                pass
 
             return None, "You are short " + "\n".join(output_list)
 
-    if amt < 0:
+    elif amt < 0:
 
         gold, silver, copper = coin_parse(amt * -1)
+
         return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
 
     else:
-        return {}, ""
+        return {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}, ""
 
-def search_creature(creature_name: str, creature_list: dict_keys):
+def search_creature(creature_name: str, creature_list: dict_keys) -> tuple(str|None, str):
+    """
+    Searches for creatures within creature list
+    
+    Args:
+        creature_name (str): Name of creature
+        creature_list (dict_keys): List of creature names
+    
+    Return:
+        str|None: Creature name (None if error)
+        str: Message
+    """
 
+    # If creature found
     if (search_result := search_list(creature_name, creature_list)):
 
+        # If exactly one match
         if len(search_result) == 1:
             return search_result[0], ""
 
+        # If more than one match
         else:
             
+            # For each match found
             for match in search_result:
-                if match.lower() != creature_name.lower():
-                    pass
 
-                else:
+                # If exact match
+                if match.lower() == creature_name.lower():
                     return match, ""
 
             search_result.insert(0, "**Multiple Matches Found:**")
@@ -203,15 +269,29 @@ def search_creature(creature_name: str, creature_list: dict_keys):
     return None, "Creature not found"
 
 
-def arg_handler(arg_dict: dict, cvar_dict: dict, svar_dict: dict):
+def arg_handler(arg_dict: dict, cvar_dict: dict, svar_dict: dict) -> dict:
+    """
+    Handles passed arguments and manages overrides
 
+    Args:
+        arg_dict (dict): Dictionary of arguments
+        cvar_dict (dict): CVAR dictionary
+        svar_dict (dict): SVAR dictionary
 
+    Return:
+        dict: Updated CVAR dictionary
+    """
+
+    # For each key, value in argument dictionary
     for key, value in arg_dict.items():
 
+        # Match key
         match key:
 
+            # Skill used
             case "skill":
 
+                # Default skill list
                 skill_list = [
                     "acrobatics",
                     "animalHandling",
@@ -239,319 +319,362 @@ def arg_handler(arg_dict: dict, cvar_dict: dict, svar_dict: dict):
                     "charisma"
                 ]
 
-                if value == "":
-                    pass
-
-                elif value.lower() == "none":
+                # If none is pass through (remove override skill name)
+                if value.lower() == "none":
                     cvar_dict["current_taming"]["skill"] = ""
 
-                else:
+                # If not empty
+                elif value != "":
+
+                    # If settings exists
                     if "settings" in svar_dict.keys():
+
+                        # If skills exists
                         if "skills" in svar_dict["settings"]:
+
+                            # If there is at least one skill in settings
                             if len(svar_dict["settings"]["skills"]) > 0:
                                 skill_list = svar_dict["settings"]["skills"]
 
-                            else:
-                                pass
-
+                        # If skills does not exist
                         else:
                             skill_list = ["animalHandling", "sleightOfHand", "nature", "survival"]
 
+                    # If settings does not exist
                     else:
                         skill_list = ["animalHandling", "sleightOfHand", "nature", "survival"]
 
+                    # If it found a valid skill
                     if (search_result := search_list(value, skill_list)):
 
+                        # If it found one match
                         if len(search_result) == 1:
                             cvar_dict["current_taming"]["skill"] = search_result[0]
 
+                        # If it found more than one match
                         else:
                             cvar_dict["current_taming"]["skill"] = ""
 
+                    # If it did not find a valid skill
                     else:
                         cvar_dict["current_taming"]["skill"] = ""
 
+            # Bonus value
             case "bonus":
 
-                if value == 0:
-                    pass
+                # If value is not zero
+                if value != 0:
+                    cvar_dict["current_taming"]["bonus"] = value                   
 
-                else:
-                    cvar_dict["current_taming"]["bonus"] = value
-
+            # Ignore argument
             case "ignore":
 
+                # If not bypass
                 if not value:
                     cvar_dict["current_taming"]["current_bypass"] = False
 
+                # If bypass
                 else:
                     cvar_dict["current_taming"]["current_bypass"] = True
                     cvar_dict["current_taming"]["alltime_bypass"] = True
 
+            # Expertise
             case "expert":
 
+                # If true
                 if value:
                     cvar_dict["current_taming"]["proficiency"] = "expert"
 
-                else:
-                    pass
-
+            # Proficient 
             case "prof":
 
+                # If true
                 if value:
-                    if "proficiency" in cvar_dict["current_taming"].keys():
-                        pass
 
-                    else:
+                    # If proficiency not in settings (if expertise was not selected)
+                    if "proficiency" not in cvar_dict["current_taming"].keys():
                         cvar_dict["current_taming"]["proficiency"] = "prof"
 
-                else:
-                    pass
-
+            # Max failures
             case "fail":
 
+                # If true
                 if value:
 
+                    # Try to turn it into an integer
                     try:
                         value = int(value)
 
-                        if value > 0:
-                            pass
-
-                        else:
+                        # If value is less than 1
+                        if value < 1:
                             value = 1
 
+                        # If alterations already exists
                         if "alterations" in cvar_dict["current_taming"].keys():
                             cvar_dict["current_taming"]["alterations"]["failure_max"] = value
 
+                        # If alterations don't exist
                         else:
                             cvar_dict["current_taming"]["alterations"] = {"failure_max": value}
 
+                    # If value was not a number
                     except:
                         pass
 
-                else:
-                    pass
-
+            # Max successes
             case "succ":
 
+                # If true
                 if value:
 
+                    # Try to turn it into an integer
                     try:
                         value = int(value)
 
-                        if value > 0:
-                            pass
-
-                        else:
+                        # If value is less than 1
+                        if value < 1:
                             value = 1
 
+                        # If alterations already exists
                         if "alterations" in cvar_dict["current_taming"].keys():
                             cvar_dict["current_taming"]["alterations"]["success_max"] = value
 
+                        # If alterations don't exist
                         else:
                             cvar_dict["current_taming"]["alterations"] = {"success_max": value}
 
+                    # If value was not a number
                     except:
                         pass
 
-                else:
-                    pass
-
+            # Cost of taming
             case "cost":
 
+                # If true
                 if value:
 
+                    # Try to round number to nearest two decimals
                     try:
                         value = round(float(value), 2)
 
+                        # If alterations already exists
                         if "alterations" in cvar_dict["current_taming"].keys():
                             cvar_dict["current_taming"]["alterations"]["cost"] = value
 
+                        # If alterations don't exist
                         else:
                             cvar_dict["current_taming"]["alterations"] = {"cost": value}
 
+                    # If value was not a number
                     except:
                         pass
 
-                else:
-                    pass
-
+            # Advantage
             case "adv":
 
+                # Straight roll
                 if value == 0:
                     cvar_dict["current_taming"]["advantage"] = None
 
+                # Advantage
                 elif value == 1:        
                     cvar_dict["current_taming"]["advantage"] = "adv"    
 
+                # Double advantage
                 elif value == 2:
                     cvar_dict["current_taming"]["advantage"] = "eadv"
 
+                # Disadvantage
                 else:
                     cvar_dict["current_taming"]["advantage"] = "dis"
 
-            case _:
-                pass
-
+            # Bonus to roll
             case "bonus":
 
-                value = int(value)
-
+                # Try to roll value (dice or number)
                 try:
-                    value = int(value)
+                    vroll(value)
 
+                    # If value is not zero
                     if value != 0:
-                        cvar_dict["current_taming"]["bonus"]
+                        cvar_dict["current_taming"]["bonus"] = bonus
 
-                    else:
-                        pass
-
+                # If invalid input
                 except:
                     pass
-
 
     return hidden_cvar_keys(cvar_dict, "reveal")
 
 
-def grab_creature_settings(alterations: dict, creature_settings: dict):
+def grab_creature_settings(alterations: dict, creature_settings: dict) -> dict:
+    """
+    Grabs creature settings
 
+    Args:
+        alterations (dict): Dictionary of alterations
+        creature_settings (dict): Creature settings
+
+    Return:
+        dict: Updated creature settings
+    """
+
+    # For each key, value in alterations
     for key, value in alterations.items():
 
         match key:
+
+            # Success max
             case "success_max":
 
+                # If true
                 if value:
                     creature_settings["succ"] = value
 
-                else:
-                    pass
-
+            # Failure max
             case "failure_max":
 
+                # If true
                 if value:
                     creature_settings["fail"] = value
 
-                else:
-                    pass
-
+            # Taming cost
             case "cost":
 
                 if value:
                     creature_settings["cost"] = value
 
-                else:
-                    pass
-
+    # Set color to ""
     if not "color" in creature_settings.keys():
         creature_settings["color"] = ""
 
-    else:
-        pass
-
+    # For each setting
     for setting in ["lvl", "cost", "xp"]:
+
+        # If it does not exist
         if setting not in creature_settings.keys():
             creature_settings[setting] = 0
-
-        else:
-            pass
 
     return creature_settings
 
 
-def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings: dict, next_tame: int, current_time: int, bypass: bool, first_tame: bool):
+def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings: dict, next_tame: int, current_time: int, bypass: bool, first_tame: bool) -> tuple(bool, dict|str):
+    """
+    Verifies that taming session can be run
 
-    # Level check
-    if ch.levels.total_level >= creature_settings["lvl"] or bypass:
-        pass
+    Args:
+        ch (AliasCharacter): Character object
+        creature_settings (dict): Creature settings
+        general_settings (dict): General settings
+        next_time (int): Next time taming can be run
+        current_time (int): Current time (in Epoch)
+        bypass (bool): Bypass restrictions
+    
+    Return:
+        bool: If success
+        dict|str: Delta change dictionary if success, error message if failure
+    """
 
-    else:
-        return False, f"Your character must be level {creature_settings['lvl']} before you can tame this creature", ""
+    # Create container to hold errors
+    error_list = []
+
+    # If below level requirement and 
+    if ch.levels.total_level < creature_settings["lvl"] and not bypass:
+        error_list.append(f"Your character must be level {creature_settings['lvl']} before you can tame this creature")
 
     # Channel check
     if len(general_settings["whitelisted_channel_ids"]) > 0:
         
-        if ctx.channel.id in general_settings["whitelisted_channel_ids"]:
-            pass
+        # If Channel ID not in settings
+        if ctx.channel.id not in general_settings["whitelisted_channel_ids"]:
 
-        else:
-            if ctx.channel.parent.id in general_settings["whitelisted_channel_ids"] and general_settings["parent_channel_inherit"]:
-                pass
+            # If parent id not in settings or parent channel inherit is turned off
+            if ctx.channel.parent.id not in general_settings["whitelisted_channel_ids"] or not general_settings["parent_channel_inherit"]:
+                error_list.append("You cannot tame in this channel/thread, speak to a staff member for additional details")
 
-            else:
-                return False, "You cannot tame in this channel/thread, speak to a staff member for additional details"
-
-    else:
-        pass
-
-    # Completed taming
+    # If existing taming
     if ch.cc_exists("Taming: Successes") and ch.cc_exists("Taming: Failures"):
 
+        # Create counter objects
         success_cc, failure_cc = ch.cc("Taming: Successes"), ch.cc("Taming: Failures")
 
+        # If success CC max does not equal settings, update success CC
         if success_cc.max != creature_settings["succ"]:
             success_cc = ch.edit_cc(
                 "Taming: Successes",
                 maxVal=str(creature_settings["succ"])
             )
 
-        else:
-            pass
-
+        # If failure CC max does not equal settings, update success CC
         if failure_cc.max != creature_settings["fail"]:
             failure_cc = ch.edit_cc(
                 "Taming: Failures",
                 maxVal=str(creature_settings["fail"])
             )
 
-        else:
-            pass
-
+        # If max failures
         if failure_cc.value >= failure_cc.max:
-            return False, f"You have failed taming, please run `{ctx.prefix}tame clear` to clear your taming progress."
+            error_list.append(f"You have failed taming, please run `{ctx.prefix}tame clear` to clear your taming progress.")
 
+        # If max successes
         elif success_cc.value >= success_cc.max:
-            return False, f"You have succeeded taming, please run `{ctx.prefix}tame clear` to clear your taming progress."
+            error_list.append(f"You have succeeded taming, please run `{ctx.prefix}tame clear` to clear your taming progress.")
 
-        else:
-            pass
+    # If before next tame and no bypass
+    if next_tame > current_time and not bypass:
+        error_list.append(f"You may not run a taming session until <t:{next_tame}:f>")
 
-    else:
-        pass
+    # If there was at least one error
+    if len(error_list) > 0:
+        return False, "\n".join(error_list)
 
-    # Cooldown check
-    if next_tame <= current_time or bypass:
-        pass
-
-    else:
-        return False, f"You may not run a taming session until <t:{next_tame}:f>", ""
-
+    # If not first taming session
     if not first_tame:
-        return True, {}
+        return True, {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}
 
+    # If first taming session
     else:
 
+        # If no bypass and cost does not equal 0
         if not bypass and creature_settings["cost"] != 0:
+
+            # Run transaction
             delta_dict, message = money_transact(ch, creature_settings["cost"])
 
+            # If transaction worked
             if delta_dict:
                 return True, delta_dict
 
+            # If transaction did not work
             else:
                 return delta_dict, message
 
+        # If bypass or cost equals 0
         else:
-            return True, {}
+            return True, {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}
 
 
-def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
+def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict) -> dict:
+    """
+    Sets up CCs so that characters can do taming
 
-    if "history" in cvar_dict.key():
+    Args:
+        ch (AliasCharacter): Character object
+        creature_settings (dict): Creature settings
+        cvar_dict (dict): CVAR dictionary
+
+    Return:
+        dict: Updated CVAR dictionary
+    """
+
+    # If history exists in CVAR
+    if "history" in cvar_dict.keys():
         cvar_dict["history"].insert(0, cvar_dict["current_taming"]["creature_name"])
 
+    # If history does not exist in CVAR
     else:
         cvar_dict["history"] = [cvar_dict["current_taming"]["creature_name"]]
     
+    # Sets up success CC
     ch.create_cc(
         name="Taming: Successes",
         minVal="0",
@@ -563,6 +686,7 @@ def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
         initial_value="0"
     )
 
+    # Sets up failure CC
     ch.create_cc(
         name="Taming: Failures",
         minVal="0",
@@ -577,8 +701,22 @@ def setup_taming(ch: AliasCharacter, creature_settings: dict, cvar_dict: dict):
     return cvar_dict
 
 
-def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_settings: dict):
+def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_settings: dict) -> tuple(str, int, AliasSkill):
+    """
+    Finds most optimal stat to be used in taming
 
+    Args:
+        ch (AliasCharacter): Character object
+        proficiency_type (str): Type of proficiency
+        general_settings (dict): General settings
+
+    Return:
+        str: Skill name
+        int: Skill value
+        AliasSkill: Skill object
+    """
+
+    # Default skills organized by ability
     ability_skills = {
         "strength": ["athletics", "strength"],
         "dexterity": ["acrobatics", "sleightOfHand", "stealth", "dexterity"],
@@ -588,8 +726,10 @@ def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_setting
         "charisma": ["deception", "intimidation", "performance", "persuasion", "charisma"]
     }
 
+    # If there is at least one skill in general settings
     if len(general_settings["skill"]) > 0:
 
+        # Create shell dictionary
         skill_dict = {
             "strength": [],
             "dexterity": [],
@@ -599,50 +739,70 @@ def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_setting
             "charisma": []
         }
 
+        # For each skill in general settings
         for skill in general_settings["skill"]:
 
+            # For each ability, skill list in full skill dictionary
             for ability, skill_list in ability_skills.items():
 
+                # If skill is in skill_list
                 if skill in skill_list:
                     skill_dict[ability].append(skill)
 
+                # If skill is not in skill_list
                 else:
                     pass
 
+        # Create temporary dictionary
         temp_dict = skill_dict.copy()
 
+        # For ability, skill list in temporary dictionary
         for ability, skill_list in temp_dict.items():
+
+            # If skill list is empty, remove ability from skill dictionary
             if skill_list == []:
                 skill_dict.pop(ability)
             
+            # If skill list is not empty
             else:
                 pass
 
+    # If all skills are allowed, copy default dictionary
     else:
         skill_dict = ability_skills.copy()
 
+    # Create empty dictionary to store skill objects
     skill_objects = {}
 
+    # For skill, skill object in skills
     for skill_name, skillobj in ch.skills:
 
+        # For each ability, skill list in skill dictionary
         for ability, skill_list in skill_dict.items():
 
+            # If skill in skill list
             if skill_name in skill_list:
 
+                # If ability aleady in skill objects
                 if ability in skill_objects.keys():
                     pass
 
+                # If ability not in skill objects
                 else:
                     skill_objects[ability] = {}
 
+                # Add skill and skill object to ability dictionary
                 skill_objects[ability].update({skill_name: skillobj})
                 break
 
+            # If skill not in skill list
             else:
                 pass
 
+    # Create placeholder values for highest stat, value, and skill object
     highest_stat, highest_value, highest_skillobj = None, -999, None
 
+    # Collect character ability mods
     character_abilty_mods = {
         "strength": strengthMod,
         "dexterity": dexterityMod,
@@ -652,41 +812,67 @@ def find_optimal_stat(ch: AliasCharacter, proficiency_type: str, general_setting
         "charisma": charismaMod
     }
 
-    skill_values = {}
-
+    # For each ability, skill dictionary in skill objects
     for ability, skill_dict in skill_objects.items():
+
+        # For each skill, skill object in skill dictionary
         for skill, skillobj in skill_dict.items():
 
+            # If proficiency is expertise
             if (prof_type := skillobj.prof) == 2 or proficiency_type == "expert":
                 prof_bonus = proficiencyBonus * 2
 
+            # If proficiency is proficient
             elif prof_type == 1 or proficiency_type == "prof":
                 prof_bonus = proficiencyBonus
 
+            # If proficiency is half-proficiency
             elif prof_type == .5 and general_settings["jack_of_trades"]:
                 prof_bonus = floor(proficiencyBonus * .5)
 
+            # If no proficiency
             else:
                 prof_bonus = 0
 
+            # If skill value is the highest, replace highest stat, vale, and skill object
             if (skill_value := skillobj.bonus + character_abilty_mods[ability] + prof_bonus) > highest_value:
                 highest_stat, highest_value, highest_skillobj = skill, skill_value, skillobj 
 
-            else:
-                pass
 
     return highest_stat, highest_value, highest_skillobj
 
 
 def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_settings: dict, cvar_dict: dict, current_time: int) -> tuple(int, int, str, str, dict, bool):
+    """
+    Runs taming session for character
 
+    Args:
+        ch (AliasCharacter): Character object
+        creature_settings (dict): Creature settings
+        general_settings (dict): General settings
+        cvar_dict (dict): CVAR dict
+        current_time (int): Current time (in Epoch)
+
+    Returns:
+        int: Success modifier
+        int: Failure modifier
+        str: Dice string
+        str: Skill name
+        dict: CVAR dict
+        bool: Fail/Succeed
+    """
+
+    # If using optimized skill
     if cvar_dict["current_taming"]["skill"] == "":
         skill_name, skill_bonus, skill_object = find_optimal_stat(ch, cvar_dict["current_taming"]["proficiency"], general_settings)
 
+    # If using override skill
     else:
 
+        # Create placeholder values for highest stat, value, and skill object
         skill_name, skill_bonus, skill_object = None, -999, None
 
+        # Collect character ability mods
         character_abilty_mods = {
             "strength": strengthMod,
             "dexterity": dexterityMod,
@@ -696,120 +882,160 @@ def run_taming_session(ch: AliasCharacter, creature_settings: dict, general_sett
             "charisma": charismaMod
         }
 
+        # For skill, skill object in character skills
         for skill, skillobj in ch.skills:
 
-            if skill != cvar_dict["current_taming"]["skill"]:
-                pass
+            # If skill matches
+            if skill == cvar_dict["current_taming"]["skill"]:
 
-            else:
-
-                # Need to change proficiency_type to actual dictionary entry
+                # If proficiency is expertise
                 if (prof_type := skillobj.prof) == 2 or cvar_dict["current_taming"]["proficiency"] == "expert":
                     prof_bonus = proficiencyBonus * 2
 
+                # If proficiency is proficient
                 elif prof_type == 1 or cvar_dict["current_taming"]["proficiency"] == "prof":
                     prof_bonus = proficiencyBonus
 
+                # If proficiency is half-proficient
                 elif prof_type == .5 and general_settings["jack_of_trades"]:
                     prof_bonus = floor(proficiencyBonus * .5)
 
+                # If no proficiency
                 else:
                     prof_bonus = 0
 
+                # Store skill name, bonus, and object
                 skill_name, skill_bonus, skill_object = cvar_dict["current_taming"]["skill"], skillobj.value, skillobj
 
                 break
 
+        # If skill was not found, use optimized skill
+        if not skill_name:
+            skill_name, skill_bonus, skill_object = find_optimal_stat(ch, cvar_dict["current_taming"]["proficiency"], general_settings)
+
+    # If no advantage/disadvantage
     if not cvar_dict["current_taming"]["advantage"]:
         dice_str = "1d20"
 
+    # If advantage
     elif cvar_dict["current_taming"]["advantage"] == "adv":
         dice_str = "2d20kh1"
 
+    # If double advantage
     elif cvar_dict["current_taming"]["advantage"] == "eadv":
         dice_str = "3d10kh1"
 
+    # If disadvantage
     else:
         dice_str = "2d20kl1"
 
+    # If halfing
     if "halfling" in ch.race.lower():
         dice_str += "ro1"
 
-    else:
-        pass
-
+    # If reliable talent
     if ch.levels.get("Rogue") >= 11 and general_settings["reliable_talent"]:
         dice_str += "mi10"
 
-    else:
-        pass
-
+    # If bonus was given
     if cvar_dict["current_taming"]["bonus"] != 0:
 
+        # Check bonus
         try:
             vroll(cvar_dict["current_taming"]["bonus"])
             bonus_str = f"{skill_bonus} + {cvar_dict['current_taming']['bonus']}"
 
+        # If bonus was not valid
         except:
             bonus_str = f"{skill_bonus}"
 
+    # If bonus was not given
     else:
         bonus_str = f"{skill_bonus}"
 
+    # Roll dice and bonus seperately
     dice_obj = vroll(dice_str)
     bonus_obj = vroll(bonus_str)
 
+    # If nat1 or nat20
     if dice_obj.total == 1 or dice_obj.total == 20:
 
+        # If nat1
         if dice_obj.total == 1:
             success_mod = general_settings["nat1"]
             failure_mod = 1
 
+        # If nat20
         else:
             success_mod = general_settings["nat20"]
             failure_mod = 0
 
+    # If not nat1 or nat20
     else:
         success_mod = 0
         failure_mod = 0
 
+    # Collect total
     total_roll = dice_obj.total + bonus_obj.total
 
+    # If total above DC
     if (over_thresh := total_roll - creature_settings['dc']) >= 0:
 
+        # Set success to true
         success = True
-        bonus_amt = 0
+
+        # Use placeholder (default 1)
+        bonus_amt = 1
+
+        # For threshold, bonus in settings
         for threshold, bonus in general_settings["success_threshold"].items():
+
+            # If over threshold
             if over_thresh >= int(threshold):
                 bonus_amt = bonus
 
+            # If not over threshold
             else:
                 break
 
+        # Add bonus to successes
         success_mod += bonus_amt
 
+        # If success mod is greater than max successes
         if success_mod > (max_succ := max(general_settings["success_threshold"].values())):
             success_mod = max_succ
 
-        else:
-            pass
-
+    # If total below DC
     else:
         success = False
         failure_mod = 1
 
+    # Construct dice string
     dice_str = f"{dice_obj.dice} + {bonus_obj.dice} = `{total_roll}`"
 
+    # Modify counters
     ch.mod_cc("Taming: Successes", success_mod)
     ch.mod_cc("Taming: Failures", failure_mod)
 
-    cvar_dict["next_tame"] = current_time
+    # Set next time for taming
+    cvar_dict["next_tame"] = current_time + creature_settings["cooldown"]
 
     return success_mod, failure_mod, dice_str, skill_name, cvar_dict, success
 
 
-def main(input_list: list[str]):
+def main(input_list: list[str]) -> tuple(str, str, str, str):
+    """
+    Main program function
 
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Title
+        str: Body content
+        str: Image URL
+        str: Hex color code
+    """
 
     # If SVAR exists, load dictionary and grab settings
     if (svar_test := get_svar("tame_settings")):
@@ -845,14 +1071,12 @@ def main(input_list: list[str]):
             else:
                 return "You Have Been Sneak Attacked by an Error", "CVAR data has been deleted, please delete CCs", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+            # Parse arguments
             args = argparse(input_list)
 
-            if "skill" in cvar_dict["current_taming"]:
-                pass
-
-            else:
+            # If skill not in current taming
+            if not "skill" in cvar_dict["current_taming"]:
                 cvar_dict["current_taming"]["skill"] = ""
-
 
             # Fills in missing values and updates values
             cvar_dict = arg_handler(
@@ -875,14 +1099,18 @@ def main(input_list: list[str]):
                 creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
                 general_settings = grab_general_settings(svar_dict)
 
+            # If creature is not in settings
             else:
                 return "You Have Been Sneak Attacked by an Error", "This creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+            # Verify that taming session can be run
             valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], False)
 
+            # If valid
             if valid:
                 delta_money_dict = output.copy()
 
+            # If not valid
             else:
                 return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
@@ -902,15 +1130,30 @@ def main(input_list: list[str]):
                     "next_tame": 0
                 }
 
+            # Find creature name
             creature_name, output = search_creature(input_list[0], svar_dict["creatures"].keys())
+
+            # Parse arguments
             args = argparse(input_list)
 
+            # If creature was found
             if creature_name:
-                cvar_dict["current_taming"]["creature_name"] = creature_name
 
+                # If current taming in CVAR
+                if "current_taming" in cvar_dict.keys():
+                    cvar_dict["current_taming"]["creature_name"] = creature_name
+
+                # If current taming not in CVAR
+                else:
+                    cvar_dict["current_taming"] = {
+                        "creature_name": creature_name
+                    }
+
+            # If creature was not found
             else:
                 return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+            # Fills in missing values and updates values
             cvar_dict = arg_handler(
                 {
                     "skill": args.last("s", default=""),
@@ -931,14 +1174,19 @@ def main(input_list: list[str]):
             creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
             general_settings = grab_general_settings(svar_dict)
 
+
+            # Verify that taming session can be run
             valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], True)
 
+            # If valid
             if valid:
                 delta_money_dict = output.copy()
 
+            # If not valid
             else:
                 return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+            # Setup taming session
             cvar_dict = setup_taming(ch, creature_settings, cvar_dict)
 
     # If no inputs were given
@@ -955,9 +1203,11 @@ def main(input_list: list[str]):
             else:
                 return "You Have Been Sneak Attacked by an Error", "CVAR data has been deleted, please delete CCs", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+        # If taming is not in progress
         else:
             return "You Have Been Sneak Attacked by an Error", "No taming is currently in process", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+        # Fills in missing values and updates values
         cvar_dict = arg_handler({}, cvar_dict, svar_dict)
 
         # If creature is still in settings
@@ -967,63 +1217,81 @@ def main(input_list: list[str]):
             creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
             general_settings = grab_general_settings(svar_dict)
 
+        # If creature is not in settings
         else:
             return "You Have Been Sneak Attacked by an Error", "This creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+        # Verify taming session can be run
         valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], False)
 
+        # If valid
         if valid:
             delta_money_dict = output.copy()
 
+        # If not valid
         else:
             return "You Have Been Sneak Attacked by an Error", output, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
+# ======================================================================================================
+
+    # Run taming session
     success_mod, failure_mod, dice_str, skill_name, cvar_dict, success_bool = run_taming_session(ch, creature_settings, general_settings, cvar_dict, current_time)
 
+    # Remove default settings
     cvar_dict = hidden_cvar_keys(cvar_dict, "hide")
+
+    # Set CVAR
     ch.set_cvar("tame_dict", dump_json(cvar_dict).replace(" ", ""))
 
+    # Grab taming CCs
     success_cc = ch.cc("Taming: Successes")
     failure_cc = ch.cc("Taming: Failures")
 
+    # If failure
     if failure_cc.value == failure_cc.max:
         added_str = f"You have failed your taming, please run `{prefix}tame clear` to clear your progress"
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/fail.png"
 
+    # If success
     elif success_cc.value == success_cc.max:
         added_str = f"You have succeeded your taming, please run `{prefix}tame clear` to clear your progress"
         img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/success.png"
 
+    # If neither
     else:
         added_str = ""
 
+        # If character image is not blank
         if image != "":
             img_url = image
 
+        # If character image is blank
         else:
             img_url = "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
 
-    if "current_bypass" in cvar_dict["current_taming"].keys():
-        if not cvar_dict["current_taming"]["current_bypass"]:
+    # If current taming exists
+    if "current_taming" in cvar_dict["current_taming"].keys():
 
+        # If bypass
+        if cvar_dict["current_taming"]["current_bypass"]:
+
+            # If empty string
             if added_str == "":
                 added_str = "`BYPASS USED`"
 
+            # If not empty string
             else:
                 added_str += "\n`BYPASS USED`"
 
-        else:
-            pass
-
-    else:
-        pass
-
+    # If success
     if success_bool:
         result_list = ["**Success**"]
 
+    # If failure
     else:
         result_list = ["**Failure**"]
 
+    # Formatting map 
     skill_map = {
         "acrobatics": "Acrobatics",
         "animalHandling": "Animal Handling",
@@ -1051,59 +1319,73 @@ def main(input_list: list[str]):
         "charisma": "Charisma"
     }
 
+    # Skill used, DC, and dice string
     result_list.append(f"Skill Used: {skill_map[skill_name]}")
-
     result_list.append(f"DC: {creature_settings['dc']}\n")
-
     result_list.append(f"{dice_str}\n")
 
+    # If success mod positive
     if success_mod > 0:
         succ_add = f" (+{success_mod})"
 
+    # If success mod negative
     elif success_mod < 0:
         succ_add = f" ({success_mod})"
 
+    # If success mod zero
     else:
         succ_add = ""
 
+    # Success string
     succ_str = f"{success_cc.value}/{success_cc.max}"
-
     result_list.append(f"Successes: {succ_str}{succ_add}")
 
+    # If counter matches
     if succ_str == (cc_str := ch.cc_str("Taming: Successes")):
         result_list.append("")
 
+    # If counter does not match
     else:
         result_list.append(f"{cc_str}\n")
 
+    # If failure mod positive
     if failure_mod > 0:
         fail_add = f" (+{failure_mod})"
 
+    # If failure mod zero
     elif failure_mod == 0:
         fail_add = ""
 
+    # If failure mod negatve
     else:
        fail_add = f" ({failure_mod})"
 
+    # Failure string
     fail_str = f"{failure_cc.value}/{failure_cc.max}"
-
     result_list.append(f"Failures: {fail_str}{fail_add}")
 
+    # If counter matches
     if fail_str == (cc_str := ch.cc_str("Taming: Failures")):
         result_list.append("")
 
+    # If counter does not match
     else:
         result_list.append(f"{cc_str}\n")
 
-    if delta_money_dict != dict():
+    # Next taming session
+    result_list.append(f"Next taming session: <t:{cvar_dict['next_time']}:f")
+
+    # If change on money
+    if delta_money_dict != {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}:
+
+        # Get total money change
         delta_money_float = delta_money_dict.pop("total")
 
+        # If whole number
         if delta_money_float % 1 == 0:
             delta_money_float = int(delta_money_float)
 
-        else:
-            pass
-
+        # Emoji mapping
         coin_emoji_mapping = {
             "cp": "<:DDBCopper:953399505129205830>",
             "sp": "<:DDBSilver:953399505124995122>",
@@ -1112,25 +1394,40 @@ def main(input_list: list[str]):
             "pp": "<:DDBPlatinum:953399504739106847>"
         }
 
+        # Get coinpurse
         money_dict = ch.coinpurse.get_coins()
 
+        # If money total whole number
+        if (money_total := round(money_dict["total"], 2)) % 1 == 0:
+            money_total = int(money_total)
+
+        # If change in money positive
+        if delta_money_float > 0:
+            sign = "+"
+
+        # If change in money negative
+        else:
+            sign = ""
+
+        # Create money string list from each currency
         money_str_list = [
-            f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({currency_value})"
+            f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({sign}{currency_value})"
             if currency_value != 0
             else f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]}"
             for currency_shorthand, currency_value in delta_money_dict.items()
         ]
 
+        # Add money list to output and total
         result_list.append("\n".join(money_str_list))
+        result_list.append(f"\n Total: {money_total}{coin_emoji_mapping['gp']}")
 
-    else:
-        pass
-
+    # Add added string
     result_list.append(added_str)
 
     return f"{name}'s Taming Session: {cvar_dict['current_taming']['creature_name']}", "\n".join(result_list), img_url, creature_settings["color"]
 
 
+# Main program function
 title, f, thumb, color = main(&ARGS&)
 l = "<"
 
@@ -1140,4 +1437,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame {{l}}creature name> | 2/22/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame {{l}}creature name> | 2/28/24 | ShadowsStride"
