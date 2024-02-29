@@ -1,42 +1,62 @@
 embed
 <drac2>
 
-def main() -> tuple(str, str, str, str):
 
+def main() -> tuple(str, str, str, str):
+    """
+    Main program function
+    
+    Return:
+        str: Title
+        str: Body content
+        str: Image URL
+        str: Color hex code
+    """
+
+    # If SVAR eixsts, load dictionary
     if (svar_test := get_svar("tame_settings")):
         svar_dict = load_json(svar_test)
 
-        if "creatures" in cvar_dict.keys():
+        # If creatures in SVAR
+        if "creatures" in svar_dict.keys():
             
-            if len(cvar_dict["creatures"]) > 0:
+            # If at least 1 creature in SVAR
+            if len(svar_dict["creatures"]) > 0:
 
+                # Color list storage
                 color_list = []
 
-                for creature in cvar_dict["creatures"].keys():
-                    if "color" in cvar_dict["creatures"][creature].keys():
-                        color_list.append(cvar_dict["creatures"][creature]["color"])
+                # For each creature in SVAR
+                for creature in svar_dict["creatures"].keys():
 
-                    else:
-                        pass
+                    # If color in SVAR
+                    if "color" in svar_dict["creatures"][creature].keys():
+                        color_list.append(svar_dict["creatures"][creature]["color"])
 
+                # If at least 1 color was pulled
                 if len(color_list) > 0:
                     color = randchoice(color_list)
 
+                # If no colors were pulled
                 else:
                     color = ""
 
-                return "Current Tamable Creatures", "\n".join(cvar_dict["creatures"].keys()), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
+                return "Current Tamable Creatures", "\n".join(svar_dict["creatures"].keys()), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
+            # If no creatures in SVAR
             else:
                 return "Current Tamable Creatures", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 
+        # If creatures not in SVAR
         else:
             return "Current Tamable Creatures", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 
+    # If SVAR does not exist
     else:
         return "Current Tamable Creatures", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 
 
+# Main program function
 title, f, thumb, color = main()
 
 
@@ -45,4 +65,4 @@ title, f, thumb, color = main()
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame list | 2/25/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame list | 2/28/24 | ShadowsStride"

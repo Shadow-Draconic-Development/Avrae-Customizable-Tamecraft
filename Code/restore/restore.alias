@@ -56,9 +56,10 @@ def money_transact(ch: AliasCharacter, amt: float):
 
             return None, "You are short " + "\n".join(output_list)
 
-    if amt < 0:
+    elif amt < 0:
 
         gold, silver, copper = coin_parse(amt * -1)
+
         return current_coinpurse.modify_coins(gp=gold, sp=silver, cp=copper), ""
 
     else:
@@ -200,7 +201,16 @@ def main() -> tuple(str, str, str, str):
         if "creatures" in svar_dict.keys():
             
             if len(svar_dict["creatures"]) > 0:
-                pass
+
+                if "settings" in svar_dict.keys():
+
+                    if "whitelisted_channel_ids" in svar_dict["settings"].keys():
+
+                        if len(general_settings["whitelisted_channel_ids"]) > 0:
+                            
+                            if ctx.channel.id not in general_settings["whitelisted_channel_ids"]:
+                                if ctx.channel.parent.id not in general_settings["whitelisted_channel_ids"] and not general_settings["parent_channel_inherit"]:
+                                    return False, "You cannot tame in this channel/thread, speak to a staff member for additional details"
 
             else:
                 return "You Have Been Sneak Attacked by an Error", "There are no creatures in SVAR", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
@@ -264,7 +274,7 @@ def main() -> tuple(str, str, str, str):
 
         if general_settings["pro_rate_refund"]:
 
-            percent_back = ((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5
+            percent_back = 1 - ((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5
 
             if (money_back := round(percent_back * creature_settings["cost"], 2)) > 0:
                 pass
@@ -324,12 +334,10 @@ def main() -> tuple(str, str, str, str):
         cvar_dict["backup"].pop("success_cc")
         cvar_dict["backup"].pop("failure_cc")
 
-
         cvar_dict["current_taming"] = cvar_dict.pop("backup")
         cvar_dict["backup"] = new_backup
 
         output_list.append(f"{cvar_dict['backup']['creature_name']} replaced by {cvar_dict['current_taming']['creature_name']}")
-
 
     # If not active tame
     else:
@@ -347,9 +355,8 @@ def main() -> tuple(str, str, str, str):
         else:
             creature_settings = grab_creature_settings({"success_max": None, "failure_max": None, "cost": None}, svar_dict["creatures"][cvar_dict["backup"]["creature_name"]])
 
-
-        if "money_back" in cvar_dict["backup"]:
-            money_back = cvar_dict["backup"].pop("money_back") * -1
+        if "money_back" in cvar_dict["backup"].keys():
+            money_back = cvar_dict["backup"].pop("money_back")
 
         else:
             money_back = 0
@@ -389,7 +396,7 @@ def main() -> tuple(str, str, str, str):
 
         cvar_dict["current_taming"] = cvar_dict.pop("backup")
 
-        output_list.append(f"{cvar_dict['current_taming']} has been restored")
+        output_list.append(f"{cvar_dict['current_taming']['creature_name']} has been restored")
 
     ch.set_cvar("tame_dict", dump_json(cvar_dict).replace(" ", ""))
 
@@ -413,14 +420,27 @@ def main() -> tuple(str, str, str, str):
 
         money_dict = ch.coinpurse.get_coins()
 
+        if (money_total := round(money_dict["total"], 2)) % 1 == 0:
+            money_total = int(money_total)
+
+        else:
+            pass
+
+        if delta_money_float > 0:
+            sign = "+"
+
+        else:
+            sign = ""
+
         money_str_list = [
-            f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({currency_value})"
+            f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]} ({sign}{currency_value})"
             if currency_value != 0
             else f"{coin_emoji_mapping[currency_shorthand]} {money_dict[currency_shorthand]}"
             for currency_shorthand, currency_value in delta_money_dict.items()
         ]
 
         output_list.append("\n".join(money_str_list))
+        output_list.append(f"\n Total: {money_total}{coin_emoji_mapping['gp']}")
 
     else:
         pass
@@ -437,4 +457,4 @@ title, f, thumb, color = main()
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame restore | 2/27/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame restore | 2/28/24 | ShadowsStride"

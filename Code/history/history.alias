@@ -61,6 +61,9 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
                 except:
                     output_list = compile_output(1, cvar_dict["history"])
 
+            else:
+                output_list = compile_output(1, cvar_dict["history"])
+
         else:
             return f"{name}'s Taming History", "None", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 
@@ -99,7 +102,30 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
     else:
         color = ""
 
-    return f"{name}'s Taming history", "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
+    output_str = "\n".join(output_list)
+
+    if "current_taming" in cvar_dict.keys():
+        if "creature_name" in cvar_dict["current_taming"].keys():
+
+            output_str = output_str.replace(f"{cvar_dict['current_taming']['creature_name']}\n", f"{cvar_dict['current_taming']['creature_name']} <-- (Current Taming)\n", 1)
+
+        else:
+            pass
+
+    else:
+        pass
+
+    if "backup" in cvar_dict.keys():
+        if "creature_name" in cvar_dict["backup"].keys():
+            output_str = output_str.replace(f"{cvar_dict['backup']['creature_name']}\n", f"{cvar_dict['backup']['creature_name']} <-- (In backup)\n", 1)
+
+        else:
+            pass
+
+    else:
+        pass
+
+    return f"{name}'s Taming history", output_str, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
 
 title, f, thumb, color = main(&ARGS&)
@@ -111,4 +137,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame history {{l}}#> | 2/25/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame history {{l}}#> | 2/28/24 | ShadowsStride"
