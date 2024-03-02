@@ -1,5 +1,11 @@
 multiline
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
 
 def search_list(query: str, item_list: list[str]) -> list[str]|None:
     """
@@ -23,10 +29,20 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
 
 
 def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
+
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Embed string
+        str: SVAR string
+    """
 
     # Collect prefix, date, server_id, and subalias string
     prefix = ctx.prefix
-    date = "2/18/24"
+    date = "3/1/24"
     server_id = ctx.guild.id
     subalias_str = f"{prefix}tame settings whitelist add [channel id]"
 

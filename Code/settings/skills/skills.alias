@@ -1,5 +1,11 @@
 embed
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
 
 def search_list(query: str, item_list: list[str]) -> list[str]|None:
     """
@@ -186,4 +192,4 @@ title, f, color = main()
 -f "{{f}}"
 -color "{{color}}"
 -thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
--footer "{{ctx.prefix}}tame settings skills | 2/14/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame settings skills | 3/1/24 | ShadowsStride"

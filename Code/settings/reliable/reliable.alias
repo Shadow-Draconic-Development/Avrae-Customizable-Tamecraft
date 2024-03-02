@@ -42,7 +42,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "2/18/24"
+    date = "3/1/24"
     subalias_str = f"{prefix}tame settings jack <true/false>"
 
     # Grab title name and dictionary key
@@ -51,7 +51,6 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Set default value
     default_value = False
-
 
     # If SVAR settings exists, load dictionary
     if (svar_test := get_svar("tame_settings")):

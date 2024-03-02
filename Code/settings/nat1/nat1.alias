@@ -21,8 +21,8 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "2/18/24"
-    subalias_str = f"{prefix}tame settings nat1 <#>"
+    date = "3/2/24"
+    subalias_str = f"{prefix}tame settings nat1 <-#>"
 
     # Grab title name and dictionary key
     title = "Taming Settings: Nat1 Penalty"

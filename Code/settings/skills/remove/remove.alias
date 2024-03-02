@@ -1,5 +1,11 @@
 multiline
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
 
 def search_list(query: str, item_list: list[str]) -> list[str]|None:
     """
@@ -35,7 +41,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     """
 
     # Grab date, prefix, subalias string, and title
-    date = "2/18/24"
+    date = "3/1/24"
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings skills remove [skill name]"
     title = "Taming Settings: Valid Skills"
