@@ -1,18 +1,36 @@
 embed
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
+# Server prefix
+prefix = ctx.prefix
 
-# Generate this as a help function for all the creatures subaliases
+# Output list
+output_list = [
+    f"`{prefix}tame settings creatures add`:  Subalias that allows staff members to add creatures to the tamable list",
+    "`[creature name] [-succ] [-fail] [-cooldown] [-dc] <-lvl> <-cost> <-xp> <-color>`\n",
 
+    f"`{prefix}tame settings creatures edit`: Subalias that allows staff members to edit creatures in the tamable list",
+    "`[creature name] <-succ> <-fail> <-cooldown> <-dc> <-lvl> <-cost> <-xp> <-color>`\n",
 
+    f"`{prefix}`tame settings creatures import`: Subalias that allows staff members to import creatures to the tamable list",
+    "`tame settings creatures import [JSON string]`\n",
 
+    f"`{prefix}tame settings creatures edit [creature name]`: Subalias that allows staff members to edit creatures in the tamable list",
+    "`[creature name] <-succ> <-fail> <-cooldown> <-dc> <-lvl> <-cost> <-xp> <-color>`\n",
 
-
-
-
-
-
+    f"`{prefix}tame settings creatures rename`: Subalias that allows staff members to rename creatures in the tamable list",
+    "`[old creature name] [new creature name]`"
+]
 
 
 </drac2>
+-title "Tame Settings Creatures Subaliases"
+-f "{{"\n".join(output_list)}}"
+-thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+-footer "{{prefix}}tame settings creatures | 3/3/24 | ShadowsStride"

@@ -232,39 +232,62 @@ def money_transact(ch: AliasCharacter, amt: float) -> tuple(dict|None, str):
     else:
         return {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}, ""
 
-def search_creature(creature_name: str, creature_list: dict_keys) -> tuple(str|None, str):
+def search_creature(creature_name: str, svar_dict: dict) -> tuple(str|None, str):
     """
     Searches for creatures within creature list
     
     Args:
         creature_name (str): Name of creature
-        creature_list (dict_keys): List of creature names
+        svar_dict (dict): SVAR dictionary
     
     Return:
         str|None: Creature name (None if error)
         str: Message
     """
 
-    # If creature found
-    if (search_result := search_list(creature_name, creature_list)):
+    while True:
+        # If creature found
+        if (search_result := search_list(creature_name, svar_dict["creatures"].keys())):
 
-        # If exactly one match
-        if len(search_result) == 1:
-            return search_result[0], ""
+            # If exactly one match
+            if len(search_result) == 1:
+                return search_result[0], ""
 
-        # If more than one match
+            # If more than one match
+            else:
+                
+                # For each match found
+                for match in search_result:
+
+                    # If exact match
+                    if match.lower() == creature_name.lower():
+                        return match, ""
+
+                search_result.insert(0, "**Multiple Matches Found:**")
+                
+                return None, "\n".join(search_result)
+
+        # If settings in SVAR dictionary
+        if "settings" in svar_dict.keys():
+
+            # If rename mappings in settings
+            if "rename_mappings" in svar_dict["settings"].keys():
+
+                # If creature name is in rename mappings, update creature name and search again
+                if creature_name in svar_dict["settings"]["rename_mappings"]:
+                    creature_name = svar_dict["settings"]["rename_mappings"][creature_name]
+
+                # If creature name not in rename mappings
+                else:
+                    break
+
+            # If rename mappings not in settings
+            else:
+                break
+
+        # If settings not in SVAR dictionary
         else:
-            
-            # For each match found
-            for match in search_result:
-
-                # If exact match
-                if match.lower() == creature_name.lower():
-                    return match, ""
-
-            search_result.insert(0, "**Multiple Matches Found:**")
-            
-            return None, "\n".join(search_result)
+            break
 
     return None, "Creature not found"
 
@@ -1092,8 +1115,12 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
                 svar_dict
             )
 
-            # If creature is still in settings
-            if (creature_name := cvar_dict["current_taming"]["creature_name"]) in svar_dict["creatures"].keys():
+            # Find creature name
+            creature_name, output = search_creature(cvar_dict["current_taming"]["creature_name"], svar_dict)
+
+            # If creature was found
+            if creature_name:
+                cvar_dict["current_taming"]["creature_name"] = creature_name
 
                 # Load settings
                 creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
@@ -1131,7 +1158,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
                 }
 
             # Find creature name
-            creature_name, output = search_creature(input_list[0], svar_dict["creatures"].keys())
+            creature_name, output = search_creature(input_list[0], svar_dict)
 
             # Parse arguments
             args = argparse(input_list)
@@ -1241,7 +1268,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
     cvar_dict = hidden_cvar_keys(cvar_dict, "hide")
 
     # Set CVAR
-    ch.set_cvar("tame_dict", dump_json(cvar_dict).replace(" ", ""))
+    ch.set_cvar("tame_dict", dump_json(cvar_dict))
 
     # Grab taming CCs
     success_cc = ch.cc("Taming: Successes")
@@ -1437,4 +1464,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame {{l}}creature name> | 2/28/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame {{l}}creature name> | 3/3/24 | ShadowsStride"

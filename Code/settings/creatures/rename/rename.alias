@@ -1,5 +1,10 @@
 multiline
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
 def search_list(query: str, item_list: list[str]) -> list[str]|None:
@@ -23,119 +28,182 @@ def search_list(query: str, item_list: list[str]) -> list[str]|None:
         return None
 
 
-def main(input_list: list[str]) -> tuple(str, str):
-    pass
+def add_to_rename_mappings(svar_dict: dict, old_creature_name: str, new_creature_name: str) -> dict:
+    """
+    Adds old creature name to map to new creature name so that users do not have problems.
 
+    Args:
+        svar_dict (dict): SVAR dictionary
+        old_creature_name (str): Old creature name
+        new_creature_name (str): New creature name
+
+    Return:
+        dict: Updated SVAR dictionary
+    """
+
+    # If rename mappings not in settings
+    if not "rename_mappings" in svar_dict["settings"].keys():
+        svar_dict["settings"]["rename_mappings"] = {}
+
+    # Update mapping
+    svar_dict["rename_mappings"].update({old_creature_name: new_creature_name})
+
+    return svar_dict
+
+
+def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
+
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Embed string
+        str: SVAR string
+    """
+
+    # Grab date, server prefix, and subalias string
+    date = "3/3/24"
+    prefix = ctx.prefix
+    subalias_str = f"{prefix}tame settings creatures rename [old creature name] [new creature name]"
+
+    # If there are at least 2 inputs
     if len(input_list) > 1:
 
-        date = "2/9/24"
-        prefix = ctx.prefix
-
+        # If SVAR exists, load dictionary
         if (svar_test := get_svar("tame_settings")):
             svar_dict = load_json(svar_test)
 
+            # If no creatures in SVAR
+            if not "creatures" in svar_dict.keys():
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no creatures in the taming settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+
+            # If no settings in SVAR
+            if not "settings" in svar_dict.keys():
+                svar_dict["settings"] = {}
+
+        # If SVAR does not exist
         else:
             return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Taming settings have not been setup' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures edit [creature name] | {date} | ShadowsStride'", ""
 
+    # If there are less than 2 inputs
     else:
         return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected at least old creature name and new creature name' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures edit [creature name] | {date} | ShadowsStride'", ""
 
-    if "creatures" in svar_dict.keys():
-        pass
-
-    else:
-        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no creatures in the taming settings' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", ""
-
-    
+    # Search for old creature name and new creature name    
     search_result1 = search_list(input_list[0], svar_dict["creatures"].keys())
     search_result2 = search_list(input_list[1], svar_dict["creatures"].keys())
 
 
     match search_result1, search_result2:
 
+        # If it did not find the original creature name
         case None, _:
-            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'No matches found {input_list[0]}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", ""
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'No matches found {input_list[0]}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
+        # If it found a match for old creature name and no matches for new creature name
         case _, None:
 
+            # If exactly one match for old creature name
             if len(search_result1) == 1:
+
+                # Update creature name
                 svar_dict["creatures"][input_list[1]] = svar_dict["creatures"].pop(search_result1[0])
 
+                # Update creature name mapping
+                svar_dict = add_to_rename_mappings(svar_dict, search_result1[0], input_list[1])
+
+                # If color in creature
                 if "color" in svar_dict["creatures"][input_list[1]].keys():
                     color = svar_dict["creatures"][input_list[1]]["color"]
 
+                # If color not in creature
                 else:
                     color = ""
 
+                return f"{prefix}embed -title '`{search_result1[0]} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
-                return f"{prefix}embed -title '`{search_result1[0]} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
-
+            # If more than one match for old creature name
             else:
-                for match in search_result1:
-                    if match.lower() != input_list[0].lower():
-                        pass
 
-                    else:
+                # For each match
+                for match in search_result1:
+
+                    # If exact match, update creature name
+                    if match.lower() == input_list[0].lower():
                         svar_dict["creatures"][input_list[1]] = svar_dict["creatures"].pop(match)
 
+                        # Update creature name mapping
+                        svar_dict = add_to_rename_mappings(svar_dict, match, input_list[1])
+
+                        # If color in creature
                         if "color" in svar_dict["creatures"][input_list[1]].keys():
                             color = svar_dict["creatures"][input_list[1]]["color"]
 
+                        # If color not in creature
                         else:
                             color = ""
                             
-                        return f"{prefix}embed -title 'Taming Settings: Creature Rename`{match} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+                        return f"{prefix}embed -title 'Taming Settings: Creature Rename`{match} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
+                # Insert header
                 search_result1.insert(0, "**Multiple Matches Found:**")
 
-                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result1) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", ""
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result1) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
+        # If it found a match for both old creature name and new creature name
         case _, _:
 
+            # If exactly one match for old creature name
             if len(search_result1) == 1:
                 input_list[0] = search_result1[0]
 
+            # If more than one match for old creature name
             else:
                 found = False
-                for match in search_result1:
-                    if match.lower() != input_list[0].lower():
-                        pass
 
-                    else:
+                # For each match
+                for match in search_result1:
+
+                    # If exact match
+                    if match.lower() == input_list[0].lower():
                         input_list[0] = match
                         found = True
                         break
 
-                if found:
-                    pass
+                # If not exact match found
+                if not found:
+                    search_result1.insert(0, "**Multiple Old Name Matches Found:**")
 
-                else:
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result1) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
-                    search_result1.insert(0, "**Multiple Matches Found:**")
-
-                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(search_result1) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", ""
-
-
+            # For each match for new creature name
             for match in search_result2:
 
-                if match.lower() != input_list[1].lower():
-                    pass
+                # If exact match found
+                if match.lower() == input_list[1].lower():
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '{match} already exists' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{subalias_str} | {date} | ShadowsStride'", ""
 
-                else:
-                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '{match} already exists' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '#CF142B' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", ""
-
+            # Update creature name
             svar_dict["creatures"][input_list[1]] = svar_dict["creatures"].pop(input_list[0])
 
+            # Update creature name mapping
+            svar_dict = add_to_rename_mappings(svar_dict, input_list[0], input_list[1])
+
+
+            # If color in creature
             if "color" in svar_dict["creatures"][input_list[1]].keys():
                 color = svar_dict["creatures"][input_list[1]]["color"]
 
+            # If color not in creature
             else:
                 color = ""
 
+            return f"{prefix}embed -title 'Taming Settings: Creature Rename `{input_list[0]} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
-            return f"{prefix}embed -title 'Taming Settings: Creature Rename `{input_list[0]} -> {input_list[1]}`' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -color '{color}' -footer '{prefix}tame settings creatures rename [old creature name] [new creature name] | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
-
+# Main program function
 embed_str, svar_str = main(&ARGS&)
 
 

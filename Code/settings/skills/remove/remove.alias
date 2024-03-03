@@ -41,7 +41,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     """
 
     # Grab date, prefix, subalias string, and title
-    date = "3/1/24"
+    date = "3/3/24"
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings skills remove [skill name]"
     title = "Taming Settings: Valid Skills"
@@ -261,7 +261,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     else:
         pass
 
-    return f"{prefix}embed -title '{title}' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict).replace(' ', '')}"
+    return f"{prefix}embed -title '{title}' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -color '{color}' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
 
 # Main program function

@@ -6,3 +6,8 @@ Subalias that allows server members to view the bonus thresholds
 `tame settings success`
 
 Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+
+### Subaliases
+- `add`
+- `edit`
+- `remove`

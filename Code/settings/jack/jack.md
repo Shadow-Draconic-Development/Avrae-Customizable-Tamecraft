@@ -1,6 +1,6 @@
 <h1>Settings Jack Subalias<img align="right" src="../../../Data/main.png" width="100px"></h1>
 
-Subalias that allows staff members to toggle whether jack of all trades can be used. 
+Subalias that allows staff members to toggle whether jack of all trades can be used
 
 ## Help:
 `tame settings jack <true/false>`

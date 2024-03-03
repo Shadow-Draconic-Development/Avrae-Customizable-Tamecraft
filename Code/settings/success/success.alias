@@ -73,4 +73,4 @@ title, f = main()
 -title "{{title}}"
 -f "{{f}}"
 -thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
--footer "{{ctx.prefix}}tame settings success | 3/1/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame settings success | 3/3/24 | ShadowsStride"

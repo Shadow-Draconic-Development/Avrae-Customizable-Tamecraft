@@ -42,7 +42,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "3/1/24"
+    date = "3/3/24"
     subalias_str = f"{prefix}tame settings jack <true/false>"
 
     # Grab title name and dictionary key
@@ -172,7 +172,7 @@ def main(input_list: list[str]) -> tuple(str, str):
         # Construct body content
         f_str = f"**New Value:** {new_val}\n**Old Value:** {old_value}"
 
-        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict).replace(' ', '')}"
+        return f"{prefix}embed -title '{title}' -f '{f_str}' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
                             
 
 # Main program function                        

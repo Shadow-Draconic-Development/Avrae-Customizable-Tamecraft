@@ -42,7 +42,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Collect prefix, date, server_id, and subalias string
     prefix = ctx.prefix
-    date = "3/1/24"
+    date = "3/3/24"
     server_id = ctx.guild.id
     subalias_str = f"{prefix}tame settings whitelist remove [channel id]"
 
@@ -99,7 +99,7 @@ def main(input_list: list[str]) -> tuple(str, str):
                 # Construct output
                 f_list = ["**Removed Channel:**", f"https://discord.com/channels/{server_id}/{search_result[0]}: {search_result[0]}", "\n**Current Channels:**"] + current_value
 
-                return f"{prefix}embed -title 'Taming Settings: Whitelisted Channel IDs' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict).replace(' ', '')}"
+                return f"{prefix}embed -title 'Taming Settings: Whitelisted Channel IDs' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
 
             # If there is more than one match
             else:
