@@ -2,10 +2,13 @@
 
 Subalias that allows staff members to view the creatures subaliases and their arguments
 
-## Help:
+## Help
 `tame settings creatures`
 
-### Subaliases
+## Important Notes
+- If you want to view the creature list, run `tame list` instead.
+
+## Subaliases
 - `add`
 - `edit`
 - `import`

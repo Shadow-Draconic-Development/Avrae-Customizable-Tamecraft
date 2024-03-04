@@ -1,5 +1,10 @@
 embed
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
 def money_transact(ch: AliasCharacter, amt: float) -> tuple(dict|None, str):
@@ -391,7 +396,7 @@ def main() -> tuple(str, str, str, str):
     ch.delete_cc("Taming: Failures")
 
     # Store CVAR
-    ch.set_cvar("tame_dict", dump_json(cvar_dict).replace(" ", ""))
+    ch.set_cvar("tame_dict", dump_json(cvar_dict))
 
     return title, "\n".join(["Taming progress cleared", ""] + output_list), img_url, color
 
@@ -405,4 +410,4 @@ title, f, thumb, color = main()
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame clear | 2/28/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame clear | 3/3/24 | ShadowsStride"

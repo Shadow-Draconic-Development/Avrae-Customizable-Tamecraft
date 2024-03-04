@@ -2,9 +2,12 @@
 
 Subalias that allows staff members to change the penalty for a nat1
 
-## Help:
+## Help
 `tame settings nat1 <-#>`
 
-Server members can run `tame settings nat1` just to view current settings
+## Optional arguments
+- `#`: Success penalty for a nat1 (default: -1)
 
-Nat1 penalties cannot be greater than 0 (to where it would be a bonus)
+# Important Notes
+- Server members can run `tame settings nat1` just to view current settings.
+- Nat1 penalties cannot be greater than 0 (to where it would be a bonus).

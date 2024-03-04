@@ -2,12 +2,14 @@
 
 Subalias that allows server members to view the bonus thresholds
 
-## Help:
+## Help
 `tame settings success`
 
-Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+## Important Notes
+- Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+- Threshold `-999` cannot be removed, but can be edited
 
-### Subaliases
+## Subaliases
 - `add`
 - `edit`
 - `remove`

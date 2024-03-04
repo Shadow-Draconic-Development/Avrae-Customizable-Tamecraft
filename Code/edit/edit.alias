@@ -1,5 +1,10 @@
 embed
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
 def search_list(query: str, item_list: list[str]) -> list[str]|None:
@@ -200,11 +205,16 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
                 if "creature_name" in cvar_dict["current_taming"]:
 
                     # If creature in SVAR
-                    if cvar_dict["current_taming"]["creature_name"] in cvar_dict["creatures"].keys():
+                    if cvar_dict["current_taming"]["creature_name"] in svar_dict["creatures"].keys():
 
                         # If color in SVAR
                         if "color" in cvar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
                             color = cvar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
+
+                    # Marks the creature down with a bypass if counters changed
+                    if failure_mod != 0 or success_mod != 0
+                        cvar_dict["current_taming"]["current_bypass"] = True
+                        cvar_dict["current_taming"]["alltime_bypass"] = True
 
     return f"{name} Alters their {title_str}", "\n".join(result_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
@@ -218,4 +228,4 @@ title, f, thumb, color = main(&ARGS&)
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame edit [success/failure] [#] | 2/28/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame edit [success/failure] [#] | 3/3/24 | ShadowsStride"

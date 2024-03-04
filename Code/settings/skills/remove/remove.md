@@ -2,7 +2,16 @@
 
 Subalias that allows staff members to remove skills allowed to be used in taming
 
-## Help:
+## Help
 `tame settings skills remove [skill name]`
 
-If skills are empty, all skills will be allowed.
+### Required Arguments
+- `skill name`: Name of skill to add, must be a standard 5e skill/ability (not including initiative)
+
+## Important Notes
+- If skills are empty, all skills will be allowed.
+- Default skills:
+    - Animal Handling
+    - Sleight of Hand
+    - Nature
+    - Survival

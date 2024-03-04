@@ -1,6 +1,6 @@
 <h1>Tame Alias<img align="right" src="../Data/main.png" width="100px"></h1>
 
-Main content library alias that allows players to tame creatures.
+Main content library alias that allows users to tame creatures.
 
 ## Help:
 `tame <creature name> <-s> <-b> <-i> <prof> <expert> <-succ> <-fail> <-c> <dis/adv/eadv>`
@@ -15,9 +15,9 @@ Main content library alias that allows players to tame creatures.
     - `prof`: Proficiency override to standard proficiency
     - `expert`: Proficiency override to double proficiency (overrules `prof` argument)
     - `s`: Skill to be used for taming
-        - Automatically picks skill with highest bonus, no regard for advantage
+        - Automatically picks skill with highest bonus, no regard for advantage if left untouched
         - Retained taming session to taming session, but not creature to creature
-        - Must be a skill within allowed skills
+        - Must be a skill within allowed skills, if touched
     - `b`: Misc. bonus to be applied to roll
     - `i`: Ignore cost and/or cooldown `Note: It does record you using this bypass for audit purposes`
     - `dis/adv/eadv`: (Respectively)
@@ -25,7 +25,11 @@ Main content library alias that allows players to tame creatures.
         - Advantage
         - Double advantage
 
-### Subaliases
+## Important notes
+- You can only tame one creature at a time
+    - If you want to tame two creatures at a time, I recommend starting one and clearing it. Then start your second creature, use the restore alias to switch inbetween the creatures. (May be prohibited by server staff)
+
+## Subaliases
 - `clear`
 - `edit`
 - `history`

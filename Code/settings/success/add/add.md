@@ -2,7 +2,13 @@
 
 Subalias that allows staff members to add bonus thresholds
 
-## Help:
+## Help
 `tame settings success add [threshold] [bonus]`
 
-Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+### Required Arguments
+- `threshold`: Threshold for bonus (e.g. I got 10 over the DC and went over X threshold)
+- `bonus`: The bonus for exceeding the threshold
+
+## Important Notes
+- Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+- Threshold `-999` cannot be removed, but can be edited

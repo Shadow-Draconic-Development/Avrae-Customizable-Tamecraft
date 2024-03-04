@@ -1,8 +1,13 @@
 embed
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
-def compile_output(page_num: int, history_list: list[str]) -> tuple(list[str], int):
+def compile_output(page_num: int, history_list: list[str]) -> tuple(list[str], int, int):
     """
     Compiles list of creatures from history list
 
@@ -13,6 +18,7 @@ def compile_output(page_num: int, history_list: list[str]) -> tuple(list[str], i
     Return:
         list[str]: List of creature names
         int: Page number
+        int: # of pages
     """
 
     # Prepare container
@@ -54,9 +60,9 @@ def compile_output(page_num: int, history_list: list[str]) -> tuple(list[str], i
 
             # If length of current list is greater than limit
             else:
-                return output_list[0] + output_list[i], i
+                return output_list[0] + output_list[i], i, ceil((len("\n\n".join(creature_list)) + len(output_list[0]) + 2) / char_limit)
 
-    return output_list[0] + output_list[-1], i
+    return output_list[0] + output_list[-1], i, i
 
 
 def main(input_list: list[str]) -> tuple(str, str, str, str):
@@ -102,15 +108,15 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
 
                 # Try to convert input to integer
                 try:
-                    output_list, page_num = compile_output(int(input_list), cvar_dict["history"])
+                    output_list, page_num, pages_num = compile_output(int(input_list), cvar_dict["history"])
 
                 # Failed conversion to integer
                 except:
-                    output_list, page_num = compile_output(1, cvar_dict["history"])
+                    output_list, page_num, pages_num = compile_output(1, cvar_dict["history"])
 
             # No inputs
             else:
-                output_list, page_num = compile_output(1, cvar_dict["history"])
+                output_list, page_num, pages_num = compile_output(1, cvar_dict["history"])
 
         # If length of history is zero
         else:
@@ -151,7 +157,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
                 color = randchoice(color_list)
 
     # Construct output string
-    output_str = "\n".join(output_list)
+    output_str = "\n".join([f"**Page {page_num}/{pages_num}**\n"] + output_list)
 
     # If current taming exists in CVAR and page number is 1
     if "current_taming" in cvar_dict.keys() and page_num == 1:
@@ -180,4 +186,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame history {{l}}#> | 2/29/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame history {{l}}#> | 3/3/24 | ShadowsStride"

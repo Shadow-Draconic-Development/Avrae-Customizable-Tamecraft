@@ -2,9 +2,12 @@
 
 Subalias that allows staff members to remove bonus thresholds
 
-## Help:
+## Help
 `tame settings success remove [threshold]`
 
-`-999` threshold cannot be deleted, but it can be overridden using the `edit` subalias.
+### Required Arguments
+- `threshold`: Threshold for bonus (e.g. I got 10 over the DC and went over X threshold)
 
-Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+## Important Notes
+- Nat20 bonuses do not go higher than the maximum bonus from thresholds.
+- Threshold `-999` cannot be removed, but can be edited

@@ -2,7 +2,13 @@
 
 Subalias that allows server members to view skills allowed to be used in taming
 
-## Help:
+## Help
 `tame settings skills`
 
-If skills are empty, all skills will be allowed.
+## Important Notes
+- If skills are empty, all skills will be allowed.
+- Default skills:
+    - Animal Handling
+    - Sleight of Hand
+    - Nature
+    - Survival

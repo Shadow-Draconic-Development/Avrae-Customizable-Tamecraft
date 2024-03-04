@@ -1,8 +1,71 @@
 embed
 <drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
 
 
-def main() -> tuple(str, str, str, str):
+def compile_output(page_num: int, creature_list: list[str]) -> tuple(list[str], int, int):
+    """
+    Compiles list of creatures from creature list
+
+    Args:
+        page_num (int): Page number
+        creature_list (list[str]): List of creatures from creature
+
+    Return:
+        list[str]: List of creature names
+        int: Page number
+        int: # of pages
+    """
+
+    # Prepare container
+    output_list = [["**Creatures:**"], []]
+    i = 1
+    found = False
+    char_limit = 350
+
+    # For each item in creature list
+    for item in creature_list:
+
+        # If not found
+        if not found:
+
+            # If length of current list is less than limit
+            if len("\n".join(output_list[i]) + f"\n{item}") <= char_limit:
+                output_list[i].append(item)
+
+            # If length of current list is greater than limit
+            else:
+                i += 1
+                output_list.append([item])
+
+                # Check to see page_num is found
+                try:
+                    output_list[page_num]
+                    found = True
+
+                # Page number is not found
+                except:
+                    pass
+
+        # If found
+        else:
+
+            # If length of current list is less than limit
+            if len("\n".join(output_list[i]) + f"\n{item}") <= char_limit:
+                output_list[i].append(item)
+
+            # If length of current list is greater than limit
+            else:
+                return output_list[0] + output_list[i], i, ceil((len("\n\n".join(creature_list)) + len(output_list[0]) + 2) / char_limit)
+
+    return output_list[0] + output_list[-1], i, i
+
+
+def main(input_list: list[str]) -> tuple(str, str, str, str):
     """
     Main program function
     
@@ -12,6 +75,10 @@ def main() -> tuple(str, str, str, str):
         str: Image URL
         str: Color hex code
     """
+
+    if len(input_list) == 0:
+        input_list.append(1)
+
 
     # If SVAR eixsts, load dictionary
     if (svar_test := get_svar("tame_settings")):
@@ -23,11 +90,20 @@ def main() -> tuple(str, str, str, str):
             # If at least 1 creature in SVAR
             if len(svar_dict["creatures"]) > 0:
 
+                try:
+                    output_list, page_num, pages_num = compile_output(int(input_list[0]), svar_dict["creatures"])
+
+                except:
+                    return "You Have Been Sneak Attacked by an Error", "Invalid input", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+
+                # Construct output string
+                output_str = "\n".join([f"**Page {page_num}/{pages_num}**\n"] + output_list)
+
                 # Color list storage
                 color_list = []
 
                 # For each creature in SVAR
-                for creature in svar_dict["creatures"].keys():
+                for creature in output_list[1:]:
 
                     # If color in SVAR
                     if "color" in svar_dict["creatures"][creature].keys():
@@ -41,7 +117,7 @@ def main() -> tuple(str, str, str, str):
                 else:
                     color = ""
 
-                return "Current Tamable Creatures", "\n".join(svar_dict["creatures"].keys()), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
+                return "Current Tamable Creatures", output_str, "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
             # If no creatures in SVAR
             else:
@@ -57,7 +133,8 @@ def main() -> tuple(str, str, str, str):
 
 
 # Main program function
-title, f, thumb, color = main()
+title, f, thumb, color = main(&ARGS&)
+l = "<"
 
 
 </drac2>
@@ -65,4 +142,4 @@ title, f, thumb, color = main()
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame list | 2/28/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame list {{l}}#>  | 3/3/24 | ShadowsStride"
