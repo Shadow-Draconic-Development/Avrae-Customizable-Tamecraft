@@ -389,7 +389,7 @@ def main() -> tuple(str, str, str, str):
 
             # Add currency values and total
             output_list.append("\n".join(money_str_list))
-            output_list.append(f"\n Total: {money_total}{coin_emoji_mapping['gp']}")
+            output_list.append(f"\n**Total:** {money_total}{coin_emoji_mapping['gp']}")
 
     # Delete CCs        
     ch.delete_cc("Taming: Successes")

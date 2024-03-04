@@ -251,6 +251,7 @@ def search_creature(creature_name: str, svar_dict: dict) -> tuple(str|None, str)
     """
 
     while True:
+
         # If creature found
         if (search_result := search_list(creature_name, svar_dict["creatures"].keys())):
 
@@ -279,7 +280,7 @@ def search_creature(creature_name: str, svar_dict: dict) -> tuple(str|None, str)
             if "rename_mappings" in svar_dict["settings"].keys():
 
                 # If creature name is in rename mappings, update creature name and search again
-                if creature_name in svar_dict["settings"]["rename_mappings"]:
+                if creature_name in svar_dict["settings"]["rename_mappings"].keys():
                     creature_name = svar_dict["settings"]["rename_mappings"][creature_name]
 
                 # If creature name not in rename mappings
@@ -649,7 +650,7 @@ def check_validity(ch: AliasCharacter, creature_settings: dict, general_settings
 
     # If before next tame and no bypass
     if next_tame > current_time and not bypass:
-        error_list.append(f"You may not run a taming session until <t:{next_tame}:f>")
+        error_list.append(f"You may not run a taming session. You can run a taming session <t:{next_tame}:R>")
 
     # If there was at least one error
     if len(error_list) > 0:
@@ -1133,7 +1134,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
 
             # If creature is not in settings
             else:
-                return "You Have Been Sneak Attacked by an Error", "This creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+                return "You Have Been Sneak Attacked by an Error", f"{outcome}\nThis creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
             # Verify that taming session can be run
             valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], False)
@@ -1242,8 +1243,12 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
         # Fills in missing values and updates values
         cvar_dict = arg_handler({}, cvar_dict, svar_dict)
 
-        # If creature is still in settings
-        if (creature_name := cvar_dict["current_taming"]["creature_name"]) in svar_dict["creatures"].keys():
+        # Find creature name
+        creature_name, output = search_creature(cvar_dict["current_taming"]["creature_name"], svar_dict)
+
+        # If creature was found
+        if creature_name:
+            cvar_dict["current_taming"]["creature_name"] = creature_name
 
             # Load settings
             creature_settings = grab_creature_settings(cvar_dict["current_taming"]["alterations"], svar_dict["creatures"][creature_name])
@@ -1251,7 +1256,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
 
         # If creature is not in settings
         else:
-            return "You Have Been Sneak Attacked by an Error", "This creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
+            return "You Have Been Sneak Attacked by an Error", f"{outcome}\nThis creature is no longer valid to be tamed, speak with a staff member for more details", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png", "#CF142B"
 
         # Verify taming session can be run
         valid, output = check_validity(ch, creature_settings, general_settings, cvar_dict["next_tame"], current_time, cvar_dict["current_taming"]["current_bypass"], False)
@@ -1405,7 +1410,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
         result_list.append(f"{cc_str}\n")
 
     # Next taming session
-    result_list.append(f"Next taming session: <t:{cvar_dict['next_time']}:f")
+    result_list.append(f"Next taming session: <t:{cvar_dict['next_tame']}:f>")
 
     # If change on money
     if delta_money_dict != {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}:
@@ -1451,7 +1456,7 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
 
         # Add money list to output and total
         result_list.append("\n".join(money_str_list))
-        result_list.append(f"\n Total: {money_total}{coin_emoji_mapping['gp']}")
+        result_list.append(f"\n**Total:** {money_total}{coin_emoji_mapping['gp']}")
 
     # Add added string
     result_list.append(added_str)

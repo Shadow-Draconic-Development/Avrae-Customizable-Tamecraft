@@ -41,12 +41,91 @@ def add_to_rename_mappings(svar_dict: dict, old_creature_name: str, new_creature
         dict: Updated SVAR dictionary
     """
 
+    def path_find(mapping: dict, key: str, svar_dict: dict, path: list[str] = []) -> list[str]:
+        """
+        Finds path of removed creatures
+
+        Args:
+            mapping (dict): Dictionary with mappings
+            key (str): Key being examined
+            svar_dict (dict): SVAR dictionary
+            path (list[str]): Current path (Starts with [])
+
+        Returns:
+            list(str): Path list [] if valid path, otherwise keys to be removed
+        """
+
+        # Add current key to path
+        path.append(key)
+
+        # If key has a mapping attached to it, continue down the path
+        if mapping[key] in mapping.keys():
+            path = path_find(mapping, mapping[key], svar_dict, path)
+
+            return path
+
+        # If dead end and attaches to existing creature
+        elif mapping[key] in svar_dict["creatures"].keys():
+            return []
+
+        # If dead end and does not attach to existing creature
+        else:
+            return path
+
+
+    def flatten_list(list_of_lists: list[list]) -> list:
+        """
+        Flattens lists of lists into lists
+
+        Args:
+            list_of_lists (list[list]): List of lists
+
+        Returns:
+            list: Flattened list
+        """
+
+        # Create temp list
+        flat_list = []
+
+        # For each list, concatanate list to temp list
+        for temp_list in list_of_lists:
+            flat_list += temp_list
+
+        return flat_list
+
     # If rename mappings not in settings
     if not "rename_mappings" in svar_dict["settings"].keys():
         svar_dict["settings"]["rename_mappings"] = {}
 
     # Update mapping
-    svar_dict["rename_mappings"].update({old_creature_name: new_creature_name})
+    # Note to self: Potential problems when renaming to a previously used map (that exists), but very unlikcly so program later if necessary
+    svar_dict["settings"]["rename_mappings"].update({old_creature_name: new_creature_name})
+
+    # RecursionError risk (50 times is current Draconic limit)
+    # https://github.com/avrae/draconic/blob/60836bc018fa919a96e1fa8f729bff3eaf5d5eb8/draconic/helpers.py#L30
+    try:
+
+        # Create empty ppath
+        master_path = []
+
+        # For each key, check path.
+        for key in svar_dict["settings"]["rename_mappings"].keys():
+
+            # If key is not apart of a deadend path
+            if not key in (master_path := flatten_list(master_path)):
+                master_path.append(path_find(svar_dict["settings"]["rename_mappings"], key, svar_dict))
+
+            # If key is apart of a deadend path
+            else:
+                pass
+
+        # For each key in master path, remove from rename mappings
+        for key in master_path:
+            svar_dict["settings"]["rename_mappings"].pop(key)
+
+    # If RecursionError has occurred
+    except "RecursionError":
+        pass
 
     return svar_dict
 

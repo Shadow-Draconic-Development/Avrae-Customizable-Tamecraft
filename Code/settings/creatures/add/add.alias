@@ -254,24 +254,37 @@ def add_creature(svar_dict: dict, creature_name: str, creature_settings: dict, c
                     # If 3-digit hex input contains #
                     elif length == 4:
 
+                        color = expand_hex_color(creature_settings["color"][1:].upper())
+
                         # If invalid input
-                        if not (creature_settings["color"] := expand_hex_color(creature_settings["color"][1:].upper())):
+                        if not color:
                             err("Invalid Input")
+
+                        # If valid input
+                        else:
+                            creature_settings["color"] = color
 
                     # If 3-digit hex input does not contain #
                     elif length == 3:
 
+                        color = expand_hex_color(creature_settings["color"].upper())
+
                         # If invalid input
-                        if not (creature_settings["color"] := expand_hex_color(creature_settings["color"].upper())):
+                        if not color:
                             err("Invalid Input")
+
+                        # If valid input
+                        else:
+                            creature_settings["color"] = color
 
                     # If does not follow normal constraints
                     else:
                         err("Invalid Input")
 
                     # If invalid input
-                    if not all(c in "#0123456789ABCDEF" for c in (creature_settings["color"] := creature_settings["color"].upper())):
+                    if not all(c in "#0123456789ABCDEF" for c in creature_settings["color"].upper()):
                         err("Invalid Input")
+
 
                 # If color hex does not exist
                 except "KeyError":

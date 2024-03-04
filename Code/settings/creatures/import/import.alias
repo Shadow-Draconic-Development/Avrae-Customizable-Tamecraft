@@ -61,7 +61,7 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
         # If creature not in creature errors
         else:
-            creature_errors[creature_name] = list(error_message)
+            creature_errors[creature_name] = [error_message]
 
         return creature_errors
 
@@ -88,10 +88,11 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
         return "#" + r + r + g + g + b + b
 
-
     # Create copy of dictionary
     creature_settings_copy = creature_settings.copy()
+    svar_dict["creatures"].update({creature_name: {}})
 
+    i = 0
     # If setting within copy of settings dictionary
     for setting in creature_settings_copy.keys():
 
@@ -102,11 +103,11 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert success to an integer
                 try:
-                    creature_settings["succ"] = int(creature_settings["succ"])
+                    svar_dict["creatures"][creature_name]["succ"] = int(creature_settings["succ"])
 
                     # If success less than 1
-                    if creature_settings["succ"] < 1:
-                        creature_settings["succ"] = 1
+                    if svar_dict["creatures"][creature_name]["succ"] < 1:
+                        svar_dict["creatures"][creature_name]["succ"] = 1
 
                 # Successes do not exist
                 except "KeyError":
@@ -121,11 +122,11 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert failure to an integer
                 try:
-                    creature_settings["fail"] = int(creature_settings["fail"])
+                    svar_dict["creatures"][creature_name]["fail"] = int(creature_settings["fail"])
 
                     # If failure less than 1
-                    if creature_settings["fail"] < 1:
-                        creature_settings["fail"] = 1
+                    if svar_dict["creatures"][creature_name]["fail"] < 1:
+                        svar_dict["creatures"][creature_name]["fail"] = 1
 
                 # Failures do not exist
                 except "KeyError":
@@ -140,11 +141,11 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert cooldown to an integer
                 try:
-                    creature_settings["cooldown"] = int(creature_settings["cooldown"])
+                    svar_dict["creatures"][creature_name]["cooldown"] = int(creature_settings["cooldown"])
 
                     # If cooldown less than 1
-                    if creature_settings["cooldown"] < 1:
-                        creature_settings["cooldown"] = 1
+                    if svar_dict["creatures"][creature_name]["cooldown"] < 1:
+                        svar_dict["creatures"][creature_name]["cooldown"] = 1
 
                 # Cooldown does not exist
                 except "KeyError":
@@ -159,10 +160,10 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert cooldown to an integer
                 try:
-                    creature_settings["dc"] = int(creature_settings["dc"])
+                    svar_dict["creatures"][creature_name]["dc"] = int(creature_settings["dc"])
 
                     # If DC is less than 1
-                    if creature_settings["dc"] < 1:
+                    if svar_dict["creatures"][creature_name]["dc"] < 1:
                         creature_settings["dc"] = 1
 
                 # DC does not exist
@@ -178,18 +179,18 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert character level to an integer
                 try:
-                    creature_settings["lvl"] = int(creature_settings["lvl"])
+                    svar_dict["creatures"][creature_name]["lvl"] = int(creature_settings["lvl"])
 
                     # If level is greater than 1
-                    if creature_settings["lvl"] > 1:
+                    if svar_dict["creatures"][creature_name]["lvl"] > 1:
 
                         # If level is greater than 20
-                        if creature_settings["lvl"] > 20:
-                            creature_settings["lvl"] = 20
+                        if svar_dict["creatures"][creature_name]["lvl"] > 20:
+                            svar_dict["creatures"][creature_name]["lvl"] = 20
 
                     # If level is less than 2
                     else:
-                        creature_settings.pop("lvl")
+                        svar_dict["creatures"][creature_name].pop("lvl")
 
                 # Character level does not exist
                 except "KeyError":
@@ -204,11 +205,11 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert taming cost to a float
                 try:
-                    creature_settings["cost"] = round(float(creature_settings["cost"]), 2)
+                    svar_dict["creatures"][creature_name]["cost"] = round(float(creature_settings["cost"]), 2)
 
                     # If taming cost is 0
-                    if creature_settings["cost"] == 0:
-                        creature_settings.pop("cost")
+                    if svar_dict["creatures"][creature_name]["cost"] == 0:
+                        svar_dict["creatures"][creature_name].pop("cost")
 
                 # Taming cost does not exist
                 except "KeyError":
@@ -223,11 +224,11 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                 # Try to convert experience gain to an integer
                 try:
-                    creature_settings["xp"] = int(creature_settings["xp"])
+                    svar_dict["creatures"][creature_name]["xp"] = int(creature_settings["xp"])
 
                     # If experience gain is 0
-                    if creature_settings["xp"] == 0:
-                        creature_settings.pop("xp")
+                    if svar_dict["creatures"][creature_name]["xp"] == 0:
+                        svar_dict["creatures"][creature_name].pop("xp")
 
                 # Experience gain does not exist
                 except "KeyError":
@@ -245,24 +246,27 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
 
                     # If 6-digit hex input contains #
                     if (length := len(creature_settings["color"])) == 7:
-                        creature_settings["color"] = creature_settings["color"].upper()
+                        svar_dict["creatures"][creature_name]["color"] = creature_settings["color"].upper()
 
                     # If 6-digit hex input does not contain #
                     elif length == 6:
-                        creature_settings["color"] = "#" + creature_settings["color"].upper()
+                        svar_dict["creatures"][creature_name]["color"] = "#" + creature_settings["color"].upper()
 
                     # If 3-digit hex input contains #
                     elif length == 4:
+                        svar_dict["creatures"][creature_name]["color"] = expand_hex_color(creature_settings["color"][1:].upper())
 
                         # If invalid input
-                        if not (creature_settings["color"] := expand_hex_color(creature_settings["color"][1:].upper())):
+                        if not svar_dict["creatures"][creature_name]["color"]:
                             err("Invalid Input")
 
                     # If 3-digit hex input does not contain #
                     elif length == 3:
 
+                        svar_dict["creatures"][creature_name]["color"] = expand_hex_color(creature_settings["color"].upper())
+
                         # If invalid input
-                        if not (creature_settings["color"] := expand_hex_color(creature_settings["color"].upper())):
+                        if not svar_dict["creatures"][creature_name]["color"]:
                             err("Invalid Input")
 
                     # If does not follow normal constraints
@@ -270,7 +274,7 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
                         err("Invalid Input")
 
                     # If invalid input
-                    if not all(c in "#0123456789ABCDEF" for c in (creature_settings["color"] := creature_settings["color"].upper())):
+                    if not all(c in "#0123456789ABCDEF" for c in svar_dict["creatures"][creature_name]["color"].upper()):
                         err("Invalid Input")
 
                 # If color hex does not exist
@@ -280,17 +284,6 @@ def edit_creature(svar_dict: dict, creature_name: str, creature_settings: dict, 
                 # Invalid input
                 except:
                     creature_errors = edit_creature_errors(creature_errors, creature_name, "Color Hex Code is invalid")
-
-    # Not allowed creature names
-    not_allowed_list = ["clear", "edit", "history", "list", "restore", "settings"]
-
-    # If creature name is not allowed
-    if creature_name.lower() in not_allowed_list:
-        creature_errors = edit_creature_errors(creature_errors, creature_name, f"Creature name cannot be {creature_name}")
-
-    # If no errors
-    if len(creature_errors) == 0:
-        svar_dict["creatures"][creature_name] = creature_settings
 
     return svar_dict, creature_errors
 
@@ -351,7 +344,7 @@ def main(input_dict: dict) -> tuple(str, str):
                 # Exact match found, try to edit creature in SVAR
                 if match.lower() == creature_name.lower():
                     found = True
-                    svar_dict, creature_errors = edit_creature(svar_dict, creature_name, creature_value, creature_errors, default_settings)
+                    svar_dict, creature_errors = edit_creature(svar_dict, match, creature_value, creature_errors, default_settings)
                     
                     # If no errors
                     if not creature_name in creature_errors.keys():
@@ -359,7 +352,7 @@ def main(input_dict: dict) -> tuple(str, str):
 
                 # If not found, try to add creature to SVAR
                 if not found:
-                    svar_dict, creature_errors = edit_creature(svar_dict, creature_name, creature_value, creature_errors, default_settings)
+                    svar_dict, creature_errors = edit_creature(svar_dict, match, creature_value, creature_errors, default_settings)
                     
                     # If no errors
                     if not creature_name in creature_errors.keys():
@@ -387,7 +380,7 @@ def main(input_dict: dict) -> tuple(str, str):
 
     # If no cratures edited
     else:
-        output_list.append("None")
+        output_list.append("- None")
 
     # If creature errors
     if len(creature_errors) != 0:

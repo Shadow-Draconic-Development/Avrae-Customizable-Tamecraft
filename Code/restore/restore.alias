@@ -545,7 +545,7 @@ def main() -> tuple(str, str, str, str):
 
         # Output money string
         output_list.append("\n".join(money_str_list))
-        output_list.append(f"\n Total: {money_total}{coin_emoji_mapping['gp']}")
+        output_list.append(f"\n**Total:** {money_total}{coin_emoji_mapping['gp']}")
 
     return f"{name}'s Restores Their Progress", "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
 

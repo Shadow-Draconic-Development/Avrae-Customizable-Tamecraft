@@ -42,7 +42,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, subalias string, and date
     prefix = ctx.prefix
-    subalias_str f"{prefix}tame settings creatures remove [creature name]"
+    subalias_str = f"{prefix}tame settings creatures remove [creature name]"
     date = "3/3/24"
 
     # If more than 0 inputs
@@ -64,7 +64,7 @@ def main(input_list: list[str]) -> tuple(str, str):
         if (search_result := search_list(input_list[0], svar_dict["creatures"])):
 
             # If it finds exactly one match
-            if len(search_list) == 1:
+            if len(search_result) == 1:
 
                 # Removes creature
                 input_list[0] = search_result[0]
