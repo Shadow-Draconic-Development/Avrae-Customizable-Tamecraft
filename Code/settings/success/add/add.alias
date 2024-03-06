@@ -1,0 +1,123 @@
+multiline
+<drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
+
+def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
+
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Embed string
+        str: SVAR string
+    """
+
+    # Grab prefix, date, and subalias string
+    prefix = ctx.prefix
+    date = "3/5/24"
+    subalias_str = f"{prefix}tame settings success add [threshold] [bonus]"
+
+    # Set default value
+    default_value = {
+        "-999": 1,
+        "5": 2,
+        "10": 3,
+        "15": 4,
+        "20": 5
+    }
+
+    # If SVAR exists, load dictioanry
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        # If settings exists
+        if "settings" in svar_dict.keys():
+
+            # If success threshold exists
+            if "success_threshold" in svar_dict["settings"]:
+
+                # If -999 threshold exists
+                if "-999" in svar_dict["settings"]["success_threshold"]:
+                    pass
+
+                # -999 threshold does not exist
+                else:
+                    svar_dict["settings"]["success_threshold"]["-999"] = 1 
+
+            # If success threshold does not exist
+            else:
+                svar_dict["settings"]["success_threshold"] = default_value.copy()
+
+        # If settings do not exist
+        else:
+            svar_dict["settings"] = {
+                "success_threshold": default_value.copy()
+            }
+
+    # If SVAR does not exist
+    else:
+        svar_dict = {
+            "creatures": {},
+            "settings": {
+                "success_threshold": default_value.copy()
+            }
+        }
+
+    # If at least two inputs
+    if len(input_list) > 1:
+
+        # Verify threshold/float is a number
+        try:
+            float(input_list[0])
+            input_list[1] = int(input_list[1])
+
+        # If threshold/bonus is not a number
+        except:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected numbers for the threshold and bonus' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+
+        # If threshold does not exist
+        if not input_list[0] in svar_dict["settings"]["success_threshold"].keys():
+
+            # Create threshold
+            svar_dict["settings"]["success_threshold"][input_list[0]] = input_list[1]
+
+            # If default thresholds are equal to the default value, remove success_threshold
+            if svar_dict["settings"]["success_threshold"] == default_value:
+                current_values = svar_dict["settings"].pop("success_threshold")
+
+            # If not default threshold, sort keys
+            else:
+                keys = [key for key in svar_dict["settings"]["success_threshold"].keys()]
+                keys.sort(key=int)
+
+                svar_dict["settings"]["success_threshold"] = current_values = {i: svar_dict["settings"]["success_threshold"][str(i)] for i in keys}
+
+            # Construct output
+            f_list = ["**Threshold Above DC: Bonus**\n", "*Added Setting:*", f"**{input_list[0]}:** {input_list[1]}", "\n*Updated Settings:*"] + [f"**{thresh}:** {bonus}" for thresh, bonus in current_values.items()]
+
+            return f"{prefix}embed -title 'Taming Settings: Success Threshold Bonuses' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+
+        # If threshold does exist
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'That threshold already exists, use `edit` instead' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+    # If 0-1 inputs
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected numbers for the threshold and bonus' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride' -color '#CF142B'", ""
+
+
+# Main program function
+embed_str, svar_str = main(&ARGS&)
+
+
+</drac2>
+{{embed_str}}
+{{svar_str}}

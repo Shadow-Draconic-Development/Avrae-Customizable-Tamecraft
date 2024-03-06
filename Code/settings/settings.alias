@@ -1,0 +1,50 @@
+embed
+<drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
+
+# Server prefix
+prefix = ctx.prefix
+
+# Output list
+output_list = [
+    f"`{prefix}tame settings creatures`: Subalias that allows staff members to view the creatures subaliases and their arguments (its subaliases edit settings)\n",
+
+    f"`{prefix}tame settings jack`: Subalias that allows staff members to toggle whether jack of all trades can be used",
+    "`<true/false>`\n",
+
+    f"`{prefix}tame settings lfg`: Subalias that allows staff members to toggle whether a notice is shown in Shadow's LFG Alias",
+    "`<true/false>`\n",
+
+    f"`{prefix}tame settings nat1`: Subalias that allows staff members to change the penalty for a nat1",
+    "`<-#>`\n",
+
+    f"`{prefix}tame settings nat20`: Subalias that allows staff members to change the bonus for a nat20",
+    "`<#>`\n",
+
+    f"`{prefix}tame settings parent`: Subalias that allows staff members to toggle whether threads of allowed channels inherit whitelisting",
+    "`<true/false>`\n",
+
+    f"`{prefix}tame settings refund`: Subalias that allows staff members to toggle whether a pro-rated refund is given",
+    "`<true/false>`\n",
+
+    f"`{prefx}tame settings reliable`: Subalias that allows staff members to toggle whether reliable talent can be used",
+    "`<true/false>`\n",
+
+    f"`{prefix}tame settings skills`: Subalias that allows server members to view skills allowed to be used in taming (it subaliases edit settings)\n",
+
+    f"`{prefix}tame settings success`: Subalias that allows server members to view the bonus thresholds (its subaliases edit settings)\n",
+
+    f"`{prefix}tame settings whitelist`: Subalias that allows server members to view channels in the whitelisted channel IDs (its subaliases edit settings)"
+]
+
+
+</drac2>
+-title "Tame Settings Subaliases"
+-f "{{"\n".join(output_list)}}"
+-thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+-footer "{{prefix}}tame settings creatures | 3/5/24 | ShadowsStride"

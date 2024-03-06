@@ -1,0 +1,76 @@
+embed
+<drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
+
+def main() -> tuple(str, str):
+    """
+    Main program function
+
+    Output:
+        str: Title
+        str: Body content
+    """
+
+    # Set default value
+    default_value = {
+        "-999": 1,
+        "5": 2,
+        "10": 3,
+        "15": 4,
+        "20": 5
+    }
+
+    # If SVAR exists, load dictionary
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        # If settings exists
+        if "settings" in svar_dict.keys():
+
+            # If success_threshold exists
+            if "success_threshold" in svar_dict["settings"]:
+
+                # If -999 threshold exists
+                if "-999" in svar_dict["settings"]["succes_threshold"]:
+                    pass
+
+                # If -999 threshold does not exist
+                else:
+                    svar_dict["settings"]["success_threshold"]["-999"] = 1 
+
+            # If success_threshold does not exist
+            else:
+                svar_dict["settings"]["success_threshold"] = default_value
+
+        # If settings does not exist
+        else:
+            svar_dict["settings"] = {
+                "success_threshold": default_value
+            }
+
+    else:
+        svar_dict = {
+            "creatures": {},
+            "settings": {
+                "success_threshold": default_value
+            }
+        }
+
+    f_list = ["**Threshold Above DC:** Bonus", "\n*Current Settings:*"] + [f"**{thresh}:** {bonus}" for thresh, bonus in svar_dict["settings"]["success_threshold"].items()] + ["\n*Default Settings:*"] + [f"**{thresh}:** {bonus}" for thresh, bonus in default_value.items()]
+
+    return "Taming Settings: Success Bonus Thresholds", "\n".join(f_list)
+
+
+title, f = main()
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+-footer "{{ctx.prefix}}tame settings success | 3/5/24 | ShadowsStride"

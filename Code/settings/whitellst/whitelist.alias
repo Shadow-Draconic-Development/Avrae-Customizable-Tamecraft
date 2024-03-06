@@ -1,0 +1,63 @@
+embed
+<drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
+
+def main() -> tuple(str, str, str):
+    """
+    Main program function
+
+    Return:
+        str: Title
+        str: Body content
+        str: Image URL
+    """
+
+    # If SVAR exists, load dictionary
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        # If settings exists
+        if "settings" in svar_dict.keys():
+
+            # If whitelisted channel ids exists
+            if "whitelisted_channel_ids" in svar_dict["settings"]:
+                pass
+
+            # If whitelisted channel ids does not exist
+            else:
+                return "Taming Settings: Whitelisted Channel IDs", "All channels", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+
+        # If settings does not exist
+        else:
+            return "Taming Settings: Whitelisted Channel IDs", "All channels", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+
+    # If SVAR does not exist
+    else:
+        return "Taming Settings: Whitelisted Channel IDs", "All channels", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+
+    # If length of whitelisted channel ids is 0
+    if len(svar_dict["settings"]["whitelisted_channel_ids"]) == 0:
+
+        return "Taming Settings: Whitelisted Channel IDs", "All channels", "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
+
+    # If there is at least one whitelisted channel
+    else:
+        server_id = ctx.guild.id
+
+        return "Taming Settings: Whitelisted Channel IDs", "\n".join([f"https://discord.com/channels/{server_id}/{item}: {item}" for item in svar_dict["settings"]["whitelisted_channel_ids"]]), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png" 
+
+
+# Main program function
+title, f, thumb = main()
+
+
+</drac2>
+-title "{{title}}"
+-f "{{f}}"
+-thumb "{{thumb}}"
+-footer "{{ctx.prefix}}tame settings whitelist | 3/5/24 | ShadowsStride"

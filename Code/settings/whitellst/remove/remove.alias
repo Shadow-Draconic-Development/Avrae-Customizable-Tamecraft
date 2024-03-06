@@ -1,0 +1,126 @@
+multiline
+<drac2>
+# *******************************************************
+# * This work includes material written by Seth Hartman (aka ShadowsStride)
+# * and is licensed under the Creative Commons Attribution 4.0 International License 
+# * available at https://creativecommons.org/licenses/by/4.0/legalcode.
+# *******************************************************
+
+
+def search_list(query: str, item_list: list[str]) -> list[str]|None:
+    """
+    Searches for item in list.
+
+    Args:
+        query (str): The query being made
+        item_list (list): List of items
+
+    Return:
+        list[str]|None: If it finds at least one match, it returns the item(s) in a list, otherwise it returns None
+    """
+
+    # Finds at least 1 match
+    if len(item_results := [item for item in item_list if query in str(item)]) > 0:
+        return item_results
+
+    # If it finds no matches
+    else:
+        return None
+
+
+def main(input_list: list[str]) -> tuple(str, str):
+    """
+    Main program function
+
+    Args:
+        input_list (list[str]): List of user inputs
+
+    Return:
+        str: Embed string
+        str: SVAR string
+    """
+
+    # Collect prefix, date, server_id, and subalias string
+    prefix = ctx.prefix
+    date = "3/5/24"
+    server_id = ctx.guild.id
+    subalias_str = f"{prefix}tame settings whitelist remove [channel id]"
+
+    # If SVAR exists, load dictionary
+    if (svar_test := get_svar("tame_settings")):
+        svar_dict = load_json(svar_test)
+
+        # If settings exists
+        if "settings" in svar_dict.keys():
+
+            # If whitelisted channel ids exists
+            if "whitelisted_channel_ids" in svar_dict["settings"].keys():
+
+                # If there is at least one id
+                if len(svar_dict["settings"]["whitelisted_channel_ids"]) > 0:
+                    pass
+
+                # If there are no ids
+                else:
+                    return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no channels to remove' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+            # If whitelisted channel ids do not exist
+            else:
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no channels to remove' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+        # If settings does not exist
+        else:
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no channels to remove' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+    # If SVAR does not exist
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'There are no channels to remove' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+    # If there is at least one input
+    if len(input_list) > 0:
+
+        # If there is at least one match
+        if (search_result := search_list(input_list[0], svar_dict["settings"]["whitelisted_channel_ids"])):
+
+            # If there is exactly one match
+            if len(search_result) == 1:
+                svar_dict["settings"]["whitelisted_channel_ids"].remove(int(search_result[0]))
+
+                # If there are no channels
+                if len(svar_dict["settings"]["whitelisted_channel_ids"]) == 0:
+                    current_value = ["All channels"]
+                    
+                    svar_dict["settings"].pop("whitelisted_channel_ids")
+
+                # If there are channels
+                else:
+                    current_value = [f"https://discord.com/channels/{server_id}/{channel}: {channel}" for channel in svar_dict["settings"]["whitelisted_channel_ids"]]
+
+                # Construct output
+                f_list = ["**Removed Channel:**", f"https://discord.com/channels/{server_id}/{search_result[0]}: {search_result[0]}", "\n**Current Channels:**"] + current_value
+
+                return f"{prefix}embed -title 'Taming Settings: Whitelisted Channel IDs' -f '" + "\n".join(f_list) + f"' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png' -footer '{subalias_str} | {date} | ShadowsStride'", f"{prefix}svar tame_settings {dump_json(svar_dict)}"
+
+            # If there is more than one match
+            else:
+                f_list = [f"https://discord.com/channels/{server_id}/{item}: {item}" for item in search_result]
+                f_list.insert(0, "**Multiple Matches Found:**")
+
+                return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f '" + "\n".join(f_list) + f"' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+        # If there are no matches
+        else:
+
+            return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Channel ID not found (`{input_list[0]}`)' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'"
+
+    # If there are no inputs
+    else:
+        return f"{prefix}embed -title 'You Have Been Sneak Attacked by an Error' -f 'Expected channel ID' -color '#CF142B' -thumb 'https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/error.png' -footer '{subalias_str} | {date} | ShadowsStride'", ""
+
+
+embed_str, svar_str = main(&ARGS&)
+
+
+</drac2>
+{{embed_str}}
+{{svar_str}}
