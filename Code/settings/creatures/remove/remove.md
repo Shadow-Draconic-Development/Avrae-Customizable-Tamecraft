@@ -1,6 +1,6 @@
 <h1>Settings Creatures Remove Subalias<img align="right" src="../../../../Data/main.png" width="100px"></h1>
 
-Subalias that allows staff members to edit creatures in the tamable list
+Subalias that allows staff members to remove creatures from the tamable list
 
 ## Help
 `tame settings creatures edit [creature name] `
