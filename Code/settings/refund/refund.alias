@@ -42,7 +42,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab server prefix, date of last edit, and subalias_string
     prefix = ctx.prefix
-    date = "3/3/24"
+    date = "3/5/24"
     subalias_str = f"{prefix}tame settings refund <true/false>"
 
     # Grab title name and dictionary key

@@ -191,30 +191,36 @@ def main(input_list: list[str]) -> tuple(str, str, str, str):
     # Set color default
     color = ""
 
+    # Set default
+    tame_exists = False
+
+    # If CVAR exists, load CVAR dictionary
+    if (cvar_test := ch.get_cvar("tame_dict")):
+        cvar_dict = load_json(cvar_test)
+
+        # If current taiming in CVAR
+        if "current_taming" in cvar_dict.keys():
+            tame_exists = True
+
     # If SVAR exists
-    if svar_exists:
+    if svar_exists and tame_exists:
 
-        # If creatures in SVAR and CVAR exists, load CVAR dictionary
-        if "creatures" in svar_dict.keys() and (cvar_test := ch.get_cvar("tame_dict")):
-            cvar_dict = load_json(svar_test)
+        # If creature name in CVAR and creatures in SVAR
+        if "creature_name" in cvar_dict["current_taming"] and "creatures" in svar_dict.keys():
 
-            # If current taiming in CVAR
-            if "current_taming" in cvar_dict.keys():
+            # If creature in SVAR
+            if cvar_dict["current_taming"]["creature_name"] in svar_dict["creatures"].keys():
 
-                # If creature name in CVAR
-                if "creature_name" in cvar_dict["current_taming"]:
+                # If color in SVAR
+                if "color" in svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
+                    color = svar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
 
-                    # If creature in SVAR
-                    if cvar_dict["current_taming"]["creature_name"] in svar_dict["creatures"].keys():
+    # Marks the creature down with a bypass if counters changed and tame exists
+    if (failure_mod < 0 or success_mod > 0) and tame_exists:
+        cvar_dict["current_taming"]["current_bypass"] = True
+        cvar_dict["current_taming"]["alltime_bypass"] = True
 
-                        # If color in SVAR
-                        if "color" in cvar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]].keys():
-                            color = cvar_dict["creatures"][cvar_dict["current_taming"]["creature_name"]]["color"]
-
-                    # Marks the creature down with a bypass if counters changed
-                    if failure_mod != 0 or success_mod != 0
-                        cvar_dict["current_taming"]["current_bypass"] = True
-                        cvar_dict["current_taming"]["alltime_bypass"] = True
+        ch.set_cvar("tame_dict", dump_json(cvar_dict))
 
     return f"{name} Alters their {title_str}", "\n".join(result_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", color
 
@@ -228,4 +234,4 @@ title, f, thumb, color = main(&ARGS&)
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame edit [success/failure] [#] | 3/3/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame edit [success/failure] [#] | 3/5/24 | ShadowsStride"

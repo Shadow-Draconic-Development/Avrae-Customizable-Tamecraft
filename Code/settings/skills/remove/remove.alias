@@ -41,7 +41,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     """
 
     # Grab date, prefix, subalias string, and title
-    date = "3/3/24"
+    date = "3/5/24"
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings skills remove [skill name]"
     title = "Taming Settings: Valid Skills"

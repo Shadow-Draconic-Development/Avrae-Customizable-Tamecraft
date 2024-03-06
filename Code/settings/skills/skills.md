@@ -12,3 +12,7 @@ Subalias that allows server members to view skills allowed to be used in taming
     - Sleight of Hand
     - Nature
     - Survival
+
+## Subaliases
+- `add`
+- `remove`

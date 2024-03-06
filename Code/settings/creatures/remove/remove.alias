@@ -43,7 +43,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     # Grab server prefix, subalias string, and date
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings creatures remove [creature name]"
-    date = "3/3/24"
+    date = "3/5/24"
 
     # If more than 0 inputs
     if len(input_list) != 0:

@@ -192,4 +192,4 @@ title, f, color = main()
 -f "{{f}}"
 -color "{{color}}"
 -thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
--footer "{{ctx.prefix}}tame settings skills | 3/1/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame settings skills | 3/5/24 | ShadowsStride"

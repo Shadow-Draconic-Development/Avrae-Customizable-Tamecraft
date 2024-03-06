@@ -321,7 +321,7 @@ def main(input_list: list[str]) -> tuple(str, str):
     """
 
     # Collect date, prefix, and subalias string
-    date = "3/3/24"
+    date = "3/5/24"
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings creatures add [creature name] [-succ] [-fail] [-cooldown] [-dc]\n"
 

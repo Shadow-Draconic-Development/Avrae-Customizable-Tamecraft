@@ -364,11 +364,11 @@ def main() -> tuple(str, str, str, str):
 
         # If prorated refund, calculate percent back
         if general_settings["pro_rate_refund"]:
-            percent_back = 1 - (((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5)
+            percent_back = 1 - ((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5)
 
             # If percent back is positive
             if percent_back > 0:
-                money_back = round(percent_back * cost, 2)
+                money_back = round(percent_back * creature_settings["cost"] * .5, 2)
  
             # If percent back is not positive
             else:
@@ -544,7 +544,7 @@ def main() -> tuple(str, str, str, str):
         ]
 
         # Output money string
-        output_list.append("\n".join(money_str_list))
+        output_list.append("\n" + "\n".join(money_str_list))
         output_list.append(f"\n**Total:** {money_total}{coin_emoji_mapping['gp']}")
 
     return f"{name}'s Restores Their Progress", "\n".join(output_list), "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png", ""
@@ -559,4 +559,4 @@ title, f, thumb, color = main()
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame restore | 3/3/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame restore | 3/5/24 | ShadowsStride"

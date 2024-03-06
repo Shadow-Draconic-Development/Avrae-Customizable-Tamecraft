@@ -95,6 +95,65 @@ def money_transact(ch: AliasCharacter, amt: float) -> tuple(dict|None, str):
         return {"pp": 0, "gp": 0, "ep": 0, "sp": 0, "cp": 0, "total": 0.0}, ""
 
 
+def grab_general_settings(svar_dict: dict) -> dict:
+    """
+    Grabs general settings from SVAR
+
+    Args:
+        svar_dict (dict): Dictionary from SVAR
+
+    Return:
+        dict: General settings
+    """
+
+    # Defintes default settings
+    default_settings = {
+        "lfg_integration": False,
+        "skill":[
+            "animalHandling",
+            "sleightOfHand",
+            "nature",
+            "survival"
+        ],
+        "pro_rate_refund": True,
+        "jack_of_trades": True,
+        "reliable_talent": False,
+        "success_threshold": {
+            "-999": 1,
+            "5": 2,
+            "10": 3,
+            "15": 4,
+            "20": 5
+        },
+        "nat20": 5,
+        "nat1": -1,
+        "whitelisted_channel_ids": [],
+        "parent_channel_inherit": False
+    }
+
+    # If settings in SVAR, create dictionary
+    if "settings" in svar_dict.keys():
+        settings_dict = {}
+
+        # For each setting in default_settings
+        for setting_name in default_settings.keys():
+
+            # If setting exists in SVAR, use SVAR setting
+            if setting_name in svar_dict["settings"].keys():
+                settings_dict[setting_name] = svar_dict["settings"][setting_name]
+
+            # If setting does not exist in SVAR, use default setting
+            else:
+                settings_dict[setting_name] = default_settings[setting_name]
+
+        # Return settings
+        return settings_dict
+
+    # If settings not in SVAR, return default settings
+    else:
+        return default_settings
+
+
 def main() -> tuple(str, str, str, str):
     """
     Main program function
@@ -306,11 +365,11 @@ def main() -> tuple(str, str, str, str):
 
         # If prorated refund, calculate percent back
         if general_settings["pro_rate_refund"]:
-            percent_back = 1 - (((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5) * .5)
+            percent_back = 1 - ((success_cc.value / success_cc.max) * .5 + (failure_cc.value / failure_cc.max) * .5)
 
             # If percent back is positive
             if percent_back > 0:
-                money_back = round(percent_back * cost, 2)
+                money_back = round(percent_back * cost * .5, 2)
  
             # If percent back is not positive
             else:
@@ -410,4 +469,4 @@ title, f, thumb, color = main()
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame clear | 3/3/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame clear | 3/5/24 | ShadowsStride"

@@ -22,7 +22,7 @@ def main(input_list: list[str]) -> tuple(str, str):
 
     # Grab prefix, date, and subalias string
     prefix = ctx.prefix
-    date = "3/3/24"
+    date = "3/5/24"
     subalias_str = f"{prefix}tame settings success remove [threshold]"
 
     # Set default value

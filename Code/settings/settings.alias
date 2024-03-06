@@ -47,4 +47,4 @@ output_list = [
 -title "Tame Settings Subaliases"
 -f "{{"\n".join(output_list)}}"
 -thumb "https://raw.githubusercontent.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/main/Data/main.png"
--footer "{{prefix}}tame settings creatures | 3/3/24 | ShadowsStride"
+-footer "{{prefix}}tame settings creatures | 3/5/24 | ShadowsStride"
