@@ -18,7 +18,7 @@ output_list = [
     f"`{prefix}tame settings creatures edit`: Subalias that allows staff members to edit creatures in the tamable list",
     "`[creature name] <-succ> <-fail> <-cooldown> <-dc> <-lvl> <-cost> <-xp> <-color>`\n",
 
-    f"`{prefix}`tame settings creatures import`: Subalias that allows staff members to import creatures to the tamable list",
+    f"`{prefix}tame settings creatures import`: Subalias that allows staff members to import creatures to the tamable list",
     "`tame settings creatures import [JSON string]`\n",
 
     f"`{prefix}tame settings creatures edit [creature name]`: Subalias that allows staff members to edit creatures in the tamable list",

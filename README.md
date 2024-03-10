@@ -10,7 +10,7 @@ This content library leverages the use of subaliases to allow staff members of v
     - remove
     - rename
 - [jack](https://github.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/blob/main/Code/settings/jack/jack.md) (Jack of All Trades)
-- ~~[lfg](https://github.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/blob/main/Code/settings/lfg/lfg.md) (LFG Integration)~~ (currently not setup)
+- [lfg](https://github.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/blob/main/Code/settings/lfg/lfg.md) (LFG Integration)
 - [nat1](https://github.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/blob/main/Code/settings/nat1/nat1.md) (Nat1 success penalty)
 - [nat20](https://github.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/blob/main/Code/settings/nat20/nat20.md) (Nat20 success bonus)
 - [parent](https://github.com/Shadow-Draconic-Development/Avrae-Customizable-Tamecraft/blob/main/Code/settings/parent/parent.md) (Parent Channel ID Whitelist Inheritance)
