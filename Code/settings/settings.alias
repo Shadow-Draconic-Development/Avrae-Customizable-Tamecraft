@@ -32,7 +32,7 @@ output_list = [
     f"`{prefix}tame settings refund`: Subalias that allows staff members to toggle whether a pro-rated refund is given",
     "`<true/false>`\n",
 
-    f"`{prefx}tame settings reliable`: Subalias that allows staff members to toggle whether reliable talent can be used",
+    f"`{prefix}tame settings reliable`: Subalias that allows staff members to toggle whether reliable talent can be used",
     "`<true/false>`\n",
 
     f"`{prefix}tame settings skills`: Subalias that allows server members to view skills allowed to be used in taming (it subaliases edit settings)\n",

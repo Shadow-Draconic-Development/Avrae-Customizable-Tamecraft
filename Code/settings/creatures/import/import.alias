@@ -301,7 +301,7 @@ def main(input_dict: dict) -> tuple(str, str):
     """
 
     # Collect, date, prefix, and subalias string
-    date = "3/5/24"
+    date = "10/8/24"
     prefix = ctx.prefix
     subalias_str = f"{prefix}tame settings creatures import [JSON string]"
 
@@ -439,7 +439,7 @@ def main(input_dict: dict) -> tuple(str, str):
 
 
 # Main program function
-embed_str, svar_str = main(%*%)
+embed_str, svar_str = main(load_json(%*%))
 
 
 </drac2>

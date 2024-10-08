@@ -21,48 +21,33 @@ def compile_output(page_num: int, creature_list: list[str]) -> tuple(list[str], 
         int: # of pages
     """
 
-    # Prepare container
-    output_list = [["**Creatures:**"], []]
-    i = 1
-    found = False
+    # Initialize containers and variables
     char_limit = 350
+    output_pages = [["**Creatures:**"]]  # First page title
+    current_page = 0
 
-    # For each item in creature list
+    # Iterate over each creature and append to the appropriate page
     for item in creature_list:
-
-        # If not found
-        if not found:
-
-            # If length of current list is less than limit
-            if len("\n".join(output_list[i]) + f"\n{item}") <= char_limit:
-                output_list[i].append(item)
-
-            # If length of current list is greater than limit
-            else:
-                i += 1
-                output_list.append([item])
-
-                # Check to see page_num is found
-                try:
-                    output_list[page_num]
-                    found = True
-
-                # Page number is not found
-                except:
-                    pass
-
-        # If found
+        # Join the current page's contents and the new item to check length
+        if len("\n".join(output_pages[current_page]) + f"\n{item}") <= char_limit:
+            output_pages[current_page].append(item)
         else:
+            # Create a new page and append the item to it
+            current_page += 1
+            output_pages.append([item])
 
-            # If length of current list is less than limit
-            if len("\n".join(output_list[i]) + f"\n{item}") <= char_limit:
-                output_list[i].append(item)
+    # Calculate total pages
+    total_pages = len(output_pages)
 
-            # If length of current list is greater than limit
-            else:
-                return output_list[0] + output_list[i], i, ceil((len("\n\n".join(creature_list)) + len(output_list[0]) + 2) / char_limit)
+    # Ensure page_num is within range
+    if page_num > total_pages:
+        page_num = total_pages
 
-    return output_list[0] + output_list[-1], i, i
+    if page_num < 1:
+        page_num = 1
+
+    # Return the requested page content, current page, and total pages
+    return output_pages[page_num - 1], page_num, total_pages
 
 
 def main(input_list: list[str]) -> tuple(str, str, str, str):
@@ -142,4 +127,4 @@ l = "<"
 -f "{{f}}"
 -thumb "{{thumb}}"
 -color "{{color}}"
--footer "{{ctx.prefix}}tame list {{l}}#>  | 3/5/24 | ShadowsStride"
+-footer "{{ctx.prefix}}tame list {{l}}#>  | 10/8/24 | ShadowsStride"
